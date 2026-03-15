@@ -31,21 +31,39 @@ For each HTTP service, check these endpoints in order:
 Expected: HTTP 200 within 5 seconds
 
 ### Database Health
-- **PostgreSQL:** `pg_isready -h <host> -p <port>`
-- **MongoDB:** `mongosh --eval "db.adminCommand('ping')"`
-- **Redis:** `redis-cli -h <host> -p <port> ping`
-- **MySQL:** `mysqladmin ping -h <host> -p <port>`
+
+Detect platform and use appropriate commands:
+
+| Database | Linux/Mac | Windows |
+|----------|-----------|---------|
+| PostgreSQL | `pg_isready -h <host> -p <port>` | `docker exec <container> pg_isready` or via Docker |
+| MongoDB | `mongosh --eval "db.adminCommand('ping')"` | `docker exec <container> mongosh --eval "db.adminCommand('ping')"` |
+| Redis | `redis-cli -h <host> -p <port> ping` | `docker exec <container> redis-cli ping` |
+| MySQL | `mysqladmin ping -h <host> -p <port>` | `docker exec <container> mysqladmin ping` |
+
+On Windows, database tools are typically inside Docker containers. Use `docker exec` to reach them.
 
 ### Process Health
+
+**Linux/Mac:**
 - Check if process is running: `ps aux | grep <process>`
 - Check if port is listening: `lsof -i :<port>` or `netstat -tlnp | grep <port>`
-- Check memory usage: flag if >80% of allocated memory
-- Check CPU usage: flag if sustained >90% for >30 seconds
+
+**Windows:**
+- Check if process is running: `tasklist | findstr <process>`
+- Check if port is listening: `netstat -ano | findstr :<port>`
+
+**Cross-platform (preferred):**
+- Use `curl` to check HTTP services (works on both)
+- Use `docker ps` for containerized services (works on both)
+- Check memory/CPU: `docker stats --no-stream` for containers
 
 ### Docker Health
-- `docker ps` — check container status
-- `docker inspect --format='{{.State.Health.Status}}'` — check health status
-- `docker stats --no-stream` — check resource usage
+- `docker ps` — check container status (cross-platform)
+- `docker inspect --format='{{.State.Health.Status}}'` — check health status (cross-platform)
+- `docker stats --no-stream` — check resource usage (cross-platform)
+
+**Note:** Use `docker compose` (v2, no hyphen) for cross-platform compatibility. `docker-compose` (with hyphen) is Linux-only legacy.
 
 ## Real-Time Log Watching
 

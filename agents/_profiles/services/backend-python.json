@@ -28,9 +28,11 @@
       "depends_on": ["database"]
     },
     "prod-runner": {
-      "build_command": "pip install -r requirements.txt",
-      "start_command": "gunicorn -w 4 -b 0.0.0.0:8000 app:app",
-      "alt_commands": ["uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4"],
+      "build_command": "python -m pip install -r requirements.txt",
+      "start_command_linux": "gunicorn -w 4 -b 0.0.0.0:8000 app:app",
+      "start_command_windows": "waitress-serve --port=8000 app:app",
+      "start_command_cross_platform": "uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4",
+      "note": "gunicorn does NOT work on Windows — use waitress or uvicorn instead",
       "health_endpoint": "http://localhost:8000/health"
     }
   },

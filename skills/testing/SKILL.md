@@ -101,8 +101,23 @@ Before running tests, ensure the test environment is ready:
 - Ensure API URLs point to test server, not production
 
 **Docker Test Infrastructure (if applicable):**
-- Check for `docker-compose.test.yml`
-- Start test infrastructure: `docker-compose -f docker-compose.test.yml up -d`
+- Check for `docker-compose.test.yml` or `compose.test.yaml`
+- Start test infrastructure: `docker compose -f docker-compose.test.yml up -d` (use v2 syntax)
+
+## Cross-Platform Testing Notes
+
+| Concern | Linux/Mac | Windows |
+|---------|-----------|---------|
+| Path separators | `/` forward slashes | Use `/` in Node/Python (they handle it). Use `path.join()` in code. |
+| Line endings | LF | CRLF — use `.gitattributes` to normalize. Snapshot tests may diff on line endings. |
+| File permissions | `chmod +x` | Not applicable — skip permission tests on Windows |
+| Symlinks | `ln -s` works | Needs developer mode or admin. Use junctions instead. |
+| Temp directories | `/tmp/` | `%TEMP%` / `os.tmpdir()` — use `os.tmpdir()` in code |
+| Shell commands in tests | `bash` commands | Use Node/Python APIs instead of shell commands in tests |
+| gunicorn | Works | Does NOT work — use waitress or uvicorn |
+| Docker | `docker compose` | `docker compose` (same with Docker Desktop) |
+
+**Best practice:** Write tests using language APIs (fs, os, path) not shell commands. This makes tests cross-platform by default.
 
 ## Test Planning
 

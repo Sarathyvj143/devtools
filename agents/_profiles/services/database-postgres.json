@@ -16,8 +16,10 @@
     }
   },
   "runner": {
-    "start_command": "docker-compose up -d postgres",
-    "health_check": "pg_isready -h localhost -p 5432",
+    "start_command": "docker compose up -d postgres",
+    "health_check_docker": "docker exec postgres pg_isready -U postgres",
+    "health_check_native_linux": "pg_isready -h localhost -p 5432",
+    "health_check_native_windows": "docker exec postgres pg_isready -U postgres",
     "default_port": 5432,
     "startup_order": 1
   },

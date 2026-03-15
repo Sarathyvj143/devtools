@@ -1,6 +1,6 @@
 # DevTools — Codex Installation
 
-## Setup
+## Setup (Linux/Mac)
 
 1. Clone the repo:
 
@@ -17,11 +17,45 @@
 
    > **Note:** Verify symlink path against current Codex docs — path may vary by version.
 
-3. For tool name differences between Claude Code and Codex, see:
-   `skills/using-devtools/references/codex-tools.md`
+## Setup (Windows)
+
+1. Clone the repo:
+
+   ```powershell
+   git clone https://github.com/Sarathyvj143/devtools.git %USERPROFILE%\.codex\devtools
+   ```
+
+2. Create a directory junction (symlink alternative — no admin required):
+
+   ```cmd
+   mkdir %USERPROFILE%\.agents\skills 2>nul
+   mklink /J %USERPROFILE%\.agents\skills\devtools %USERPROFILE%\.codex\devtools\skills
+   ```
+
+   Or in PowerShell (requires admin):
+   ```powershell
+   New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills\devtools" -Target "$env:USERPROFILE\.codex\devtools\skills"
+   ```
+
+   Or in Git Bash:
+   ```bash
+   mkdir -p ~/.agents/skills
+   # Git Bash on Windows supports symlinks if developer mode is enabled
+   ln -s ~/.codex/devtools/skills ~/.agents/skills/devtools
+   ```
+
+## Tool Name Mapping
+
+For tool name differences between Claude Code and Codex, see:
+`skills/using-devtools/references/codex-tools.md`
 
 ## Updating
 
 ```bash
 cd ~/.codex/devtools && git pull
+```
+
+On Windows (cmd):
+```cmd
+cd %USERPROFILE%\.codex\devtools && git pull
 ```

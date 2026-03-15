@@ -16,8 +16,10 @@
     }
   },
   "runner": {
-    "start_command": "docker-compose up -d mongo",
-    "health_check": "mongosh --eval \"db.adminCommand('ping')\"",
+    "start_command": "docker compose up -d mongo",
+    "health_check_docker": "docker exec mongo mongosh --eval \"db.adminCommand('ping')\"",
+    "health_check_native_linux": "mongosh --eval \"db.adminCommand('ping')\"",
+    "health_check_native_windows": "docker exec mongo mongosh --eval \"db.adminCommand('ping')\"",
     "default_port": 27017,
     "startup_order": 1
   },
