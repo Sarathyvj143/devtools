@@ -72,10 +72,19 @@ Read team-config.json for service assignments.
 - DevOps runs in parallel if scoped to infra-only files
 - Each developer follows `superpowers:executing-plans`
 
-**Step 4c: Test**
-- Tester runs AFTER developers complete
-- Tester reads Log Tracker output to correlate test failures with service errors
+**Step 4c: Test (per-service testers in parallel, then integration)**
+- All tester agents invoke `devtools:testing` skill first
+- Per-service testers run in parallel (scoped to their own service):
+  - Frontend tester → frontend tests (components, UI, accessibility)
+  - Backend tester → backend tests (API, middleware, business logic)
+  - Database tester → database tests (queries, migrations, integrity)
+  - Cloud tester → infrastructure tests (IaC validation, security compliance)
+- AFTER per-service testers complete: Integration tester runs
+  - Reads per-service test reports
+  - Runs cross-service E2E and contract tests
+  - Correlates failures with Log Tracker output
 - Health Monitor reports any service degradation during tests
+- All testers update project test scripts (package.json, etc.)
 
 **Gate:** Dispatch Integration-Verifier agent to check:
 - API contracts match between services

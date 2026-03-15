@@ -114,37 +114,48 @@ For each selected agent:
    - Cloud-specific: `{{AWS_SERVICES}}`, `{{CLOUD_PROVIDERS}}`, `{{INFRA_PATHS}}`, etc.
 5. Write to `.claude/agents/<generated-name>.md`
 
-#### Special Handling: Fullstack Tester
+#### Special Handling: Tester Agents (Per-Service)
 
-When composition profile specifies `fullstack-tester` (multi-service project):
+Instead of one generic tester, generate **multiple specialized tester agents** based on detected services:
 
-1. Read the tester base template
-2. **Merge instructions from ALL detected service profiles:**
-   - Collect `agent_customizations.tester.extra_instructions` from each service profile
-   - Combine into a single `{{SERVICE_TEST_INSTRUCTIONS}}` block, grouped by service:
-     ```
-     ### Frontend (React) — ./frontend
-     Use React Testing Library for component tests. Test user interactions, not implementation details. Use MSW for API mocking.
+**For each detected service, generate a specialized tester:**
 
-     ### Backend (Node.js) — ./backend
-     Use supertest for API endpoint testing. Mock database and external services. Test both success and error paths for every endpoint.
-     ```
-3. Replace `{{SERVICES_UNDER_TEST}}` with a list of all detected services and paths:
-   ```
-   - frontend (React) — ./frontend
-   - backend (Node.js/Express) — ./backend
-   - database (PostgreSQL)
-   ```
-4. Replace `{{TEST_RUNNER}}` with all detected test runners: e.g., "vitest (frontend), jest (backend)"
-5. Replace `{{TECH_STACK}}` with combined tech stack from all services
-6. Name the generated file `fullstack-tester.md`
+| Service Type | Base Template | Generated Agent Name |
+|-------------|---------------|---------------------|
+| Frontend (React/Vue/Next) | `tester-frontend.md` | `react-frontend-tester.md` |
+| Backend (Node/Python/Go) | `tester-backend.md` | `node-backend-tester.md` |
+| Database (Postgres/Mongo) | `tester-database.md` | `postgres-db-tester.md` |
+| Cloud (AWS/GCP/Azure) | `tester-cloud.md` | `aws-cloud-tester.md` |
 
-#### Special Handling: Single-Service Tester
+**Always generate an integration tester for multi-service projects:**
+- Base template: `tester-integration.md`
+- Generated name: `integration-tester.md`
+- Gets `{{SERVICES_UNDER_TEST}}` with ALL services listed
+- Coordinates results from all per-service testers
 
-When only one service is detected:
-1. Replace `{{SERVICES_UNDER_TEST}}` with just that service
-2. Replace `{{SERVICE_TEST_INSTRUCTIONS}}` with that profile's `tester.extra_instructions`
-3. Name prefix follows the profile (e.g., `react-tester.md` or just `tester.md`)
+**For single-service projects:**
+- Generate one per-service tester (e.g., `react-frontend-tester.md`)
+- Use the generic `tester.md` base template as fallback if no specialized template matches
+
+**All tester agents must invoke the `devtools:testing` skill** before writing tests.
+
+**Tester generation process:**
+1. For each detected service, pick the matching tester base template
+2. Apply profile's `agent_customizations.tester` (name_prefix, extra_instructions)
+3. Replace placeholders with service-specific values
+4. Replace `{{SERVICE_TEST_INSTRUCTIONS}}` with profile's `tester.extra_instructions`
+5. Write to `.claude/agents/<name>-tester.md`
+6. If multi-service: also generate `integration-tester.md` with all services listed
+
+**MCP integration:**
+- Check `.mcp.json` and `~/.claude/.mcp.json` for testing MCP servers
+- If Playwright/Puppeteer MCP found → add to frontend tester's available tools
+- If Database MCP found → add to database tester's available tools
+- If API Client MCP found → add to integration tester's available tools
+- Add discovered MCP tools to each tester's prompt as `{{MCP_TOOLS}}`
+
+**Test script updates:**
+Each tester agent is responsible for updating the project's test scripts (package.json, pyproject.toml, Makefile) to include commands for their test category.
 
 ### Step 7: Write team-config.json
 

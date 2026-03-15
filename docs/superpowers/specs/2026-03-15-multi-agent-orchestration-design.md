@@ -62,7 +62,11 @@ Each phase dispatches fresh subagents (resetting context). The controller mainta
 | 3 | Agent | Architect | System design, tech stack decisions, patterns | 2 | Read, Glob, Grep, Bash |
 | 4 | Agent | UX Designer | User experience, UI patterns, accessibility | 2 | Read, Glob, Grep, Bash |
 | 5 | Agent | Developer | Writes implementation code | 4 | Read, Write, Edit, Glob, Grep, Bash |
-| 6 | Agent | Tester | Writes and runs tests | 4 | Read, Write, Edit, Glob, Grep, Bash |
+| 6a | Agent | Frontend Tester | Frontend component, UI, accessibility, visual tests | 4 | Read, Write, Edit, Glob, Grep, Bash |
+| 6b | Agent | Backend Tester | API endpoint, middleware, business logic, auth tests | 4 | Read, Write, Edit, Glob, Grep, Bash |
+| 6c | Agent | Database Tester | Query, migration, constraint, data integrity tests | 4 | Read, Write, Edit, Glob, Grep, Bash |
+| 6d | Agent | Integration Tester | Cross-service E2E, API contract, data flow tests | 4 | Read, Write, Edit, Glob, Grep, Bash |
+| 6e | Agent | Cloud Tester | IaC validation, security compliance, resource config tests | 4 | Read, Glob, Grep, Bash |
 | 7 | Agent | Reviewer | Code review, quality checks | 5 | Read, Glob, Grep, Bash |
 | 8 | Agent | Security Analyst | Vulnerability scanning, security review | 5 | Read, Glob, Grep, Bash |
 | 9 | Agent | DevOps | CI/CD, Docker, general deployment | 4 | Read, Write, Edit, Glob, Grep, Bash |
@@ -114,7 +118,12 @@ devtools/
 │   │   ├── architect.md
 │   │   ├── ux-designer.md
 │   │   ├── developer.md
-│   │   ├── tester.md
+│   │   ├── tester.md                  # Generic tester (fallback)
+│   │   ├── tester-frontend.md         # Frontend-specific tester
+│   │   ├── tester-backend.md          # Backend-specific tester
+│   │   ├── tester-database.md         # Database-specific tester
+│   │   ├── tester-integration.md      # Cross-service integration tester
+│   │   ├── tester-cloud.md            # Cloud infrastructure tester
 │   │   ├── reviewer.md
 │   │   ├── security.md
 │   │   ├── devops.md
