@@ -1,0 +1,16 @@
+{
+  "name": "microservices",
+  "requires_min": 3,
+  "team": {
+    "per_service_developers": true,
+    "always": ["fullstack-tester", "reviewer", "architect"],
+    "recommended": ["devops", "security", "docs-writer", "cost-optimizer"],
+    "optional": ["ux-designer", "researcher", "requirements"]
+  },
+  "cross_service_checks": {
+    "api_contract": "Verify all inter-service API contracts match",
+    "shared_schemas": "Check shared data schemas are consistent across services",
+    "service_discovery": "Verify service discovery configuration is consistent",
+    "circuit_breakers": "Check fault tolerance patterns between services"
+  }
+}

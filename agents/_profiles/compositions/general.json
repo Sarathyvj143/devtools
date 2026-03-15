@@ -1,0 +1,11 @@
+{
+  "name": "general",
+  "requires": [],
+  "team": {
+    "per_service_developers": false,
+    "always": ["developer", "tester", "reviewer"],
+    "recommended": ["architect", "security"],
+    "optional": ["ux-designer", "devops", "docs-writer", "researcher", "requirements", "cost-optimizer"]
+  },
+  "cross_service_checks": {}
+}

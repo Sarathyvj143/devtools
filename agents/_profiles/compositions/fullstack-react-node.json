@@ -1,0 +1,15 @@
+{
+  "name": "fullstack-react-node",
+  "requires": ["frontend-react", "backend-node"],
+  "team": {
+    "per_service_developers": true,
+    "always": ["react-frontend-developer", "node-backend-developer", "fullstack-tester", "reviewer"],
+    "recommended": ["architect", "devops", "security"],
+    "optional": ["ux-designer", "docs-writer", "researcher", "requirements", "cost-optimizer"]
+  },
+  "cross_service_checks": {
+    "api_contract": "Verify frontend API calls match backend endpoint signatures",
+    "shared_types": "Check shared TypeScript types between frontend and backend",
+    "env_vars": "Verify all env vars used in frontend have backend counterparts"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "fullstack-react-python",
+  "requires": ["frontend-react", "backend-python"],
+  "team": {
+    "per_service_developers": true,
+    "always": ["react-frontend-developer", "python-backend-developer", "fullstack-tester", "reviewer"],
+    "recommended": ["architect", "devops", "security"],
+    "optional": ["ux-designer", "docs-writer", "researcher", "requirements", "cost-optimizer"]
+  },
+  "cross_service_checks": {
+    "api_contract": "Verify frontend API calls match backend endpoint signatures and response shapes",
+    "env_vars": "Verify all env vars used in frontend have backend counterparts"
+  }
+}
