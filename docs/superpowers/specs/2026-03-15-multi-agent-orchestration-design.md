@@ -50,7 +50,9 @@ Each phase dispatches fresh subagents (resetting context). The controller mainta
 
 ---
 
-## 3. Agent Roster (10 Subagents + 1 Skill)
+## 3. Agent Roster (11 Subagents + 1 Skill + Cloud Agents)
+
+### Core Agents (always available)
 
 | # | Type | Name | Role | Phase | Tools |
 |---|------|------|------|-------|-------|
@@ -63,10 +65,36 @@ Each phase dispatches fresh subagents (resetting context). The controller mainta
 | 6 | Agent | Tester | Writes and runs tests | 4 | Read, Write, Edit, Glob, Grep, Bash |
 | 7 | Agent | Reviewer | Code review, quality checks | 5 | Read, Glob, Grep, Bash |
 | 8 | Agent | Security Analyst | Vulnerability scanning, security review | 5 | Read, Glob, Grep, Bash |
-| 9 | Agent | DevOps | CI/CD, deployment, cloud config | 4 | Read, Write, Edit, Glob, Grep, Bash |
+| 9 | Agent | DevOps | CI/CD, Docker, general deployment | 4 | Read, Write, Edit, Glob, Grep, Bash |
 | 10 | Agent | Documentation Writer | Generates docs, API references, guides | 6 | Read, Write, Edit, Glob, Grep, Bash |
+| 11 | Agent | Cost Optimizer | Cross-cloud cost analysis, right-sizing, waste detection | 5 | Read, Glob, Grep, Bash |
 
-**Note:** The Orchestrator is a skill, not an agent. It runs at the controller level and dispatches all other agents.
+### Cloud Agents (generated when cloud providers detected)
+
+| # | Type | Name | Generated When | Role | Tools |
+|---|------|------|----------------|------|-------|
+| C1 | Agent | AWS Cloud | AWS detected + multi-cloud | AWS infrastructure, Lambda, S3, IAM, CloudWatch, compliance | Read, Write, Edit, Glob, Grep, Bash |
+| C2 | Agent | GCP Cloud | GCP detected + multi-cloud | GCP infrastructure, Cloud Functions, GCS, Firestore, monitoring | Read, Write, Edit, Glob, Grep, Bash |
+| C3 | Agent | Azure Cloud | Azure detected + multi-cloud | Azure infrastructure, Functions, Blob Storage, AD, monitoring | Read, Write, Edit, Glob, Grep, Bash |
+| C4 | Agent | Terraform Infra | Terraform detected | Terraform state, modules, cross-cloud resources | Read, Write, Edit, Glob, Grep, Bash |
+| C5 | Agent | Pulumi Infra | Pulumi detected | Pulumi stacks, cross-cloud resources | Read, Write, Edit, Glob, Grep, Bash |
+
+### Cloud Agent Generation Rules
+
+```
+Single cloud detected (e.g., only AWS):
+  → Enhance DevOps agent with AWS-specific knowledge (no separate cloud agent)
+  → Always generate Cost Optimizer agent
+
+Multiple clouds detected (e.g., AWS + GCP):
+  → Keep DevOps agent for CI/CD and general deployment
+  → Generate aws-cloud.md — scoped to AWS files/directories
+  → Generate gcp-cloud.md — scoped to GCP files/directories
+  → Generate Cost Optimizer — cross-cloud analysis
+  → If Terraform/Pulumi detected, generate infra agent too
+```
+
+**Note:** The Orchestrator is a skill, not an agent. It runs at the controller level and dispatches all other agents. Cloud agents are only generated when cloud providers are detected.
 
 ---
 
@@ -75,7 +103,7 @@ Each phase dispatches fresh subagents (resetting context). The controller mainta
 ```
 devtools/
 ├── agents/
-│   ├── _bases/                    # Base templates for 10 agents
+│   ├── _bases/                    # Base templates for 11 core agents + cloud agents
 │   │   # NOTE: No manager.md — orchestration is a skill, not an agent
 │   │   ├── requirements.md
 │   │   ├── researcher.md
@@ -86,7 +114,13 @@ devtools/
 │   │   ├── reviewer.md
 │   │   ├── security.md
 │   │   ├── devops.md
-│   │   └── docs-writer.md
+│   │   ├── docs-writer.md
+│   │   ├── cost-optimizer.md
+│   │   ├── cloud-aws.md
+│   │   ├── cloud-gcp.md
+│   │   ├── cloud-azure.md
+│   │   ├── cloud-terraform.md
+│   │   └── cloud-pulumi.md
 │   ├── _profiles/
 │   │   ├── services/              # Per-service context profiles
 │   │   │   ├── frontend-react.json
@@ -100,7 +134,12 @@ devtools/
 │   │   │   ├── mobile-react-native.json
 │   │   │   ├── infra-docker.json
 │   │   │   ├── infra-kubernetes.json
-│   │   │   └── ml-python.json
+│   │   │   ├── ml-python.json
+│   │   ├── cloud-aws.json
+│   │   ├── cloud-gcp.json
+│   │   ├── cloud-azure.json
+│   │   ├── cloud-terraform.json
+│   │   └── cloud-pulumi.json
 │   │   └── compositions/         # Multi-service combination rules
 │   │       ├── fullstack-react-node.json
 │   │       ├── fullstack-react-python.json
@@ -740,7 +779,97 @@ This is a heuristic check, not a test suite. The controller reads files and make
 
 ---
 
-## 16. Future Extensibility
+## 16. Cloud Detection and Cloud Agents
+
+### Cloud Provider Detection
+
+| Cloud | Detection Signals |
+|-------|------------------|
+| AWS | `cdk.json`, `samconfig.toml`, `serverless.yml`, `.aws/`, `buildspec.yml`, `template.yaml` (SAM), Terraform `provider "aws"` |
+| GCP | `app.yaml`, `.gcloudignore`, `firebase.json`, `.firebaserc`, Terraform `provider "google"` |
+| Azure | `azure-pipelines.yml`, `.azure/`, `host.json` (Functions), `*.bicep`, ARM templates, Terraform `provider "azurerm"` |
+| Terraform | `*.tf`, `.terraform/`, `terraform.tfvars`, `*.tfstate` |
+| Pulumi | `Pulumi.yaml`, `Pulumi.*.yaml`, Pulumi SDK imports |
+
+### Cloud Agent Specializations
+
+Each cloud agent (AWS/GCP/Azure) covers:
+
+| Area | What it handles |
+|------|----------------|
+| Infrastructure | IaC templates, networking, VPC/VNet, IAM, resource provisioning |
+| Cloud-native services | Functions (Lambda/Cloud Functions/Azure Functions), storage (S3/GCS/Blob), databases (DynamoDB/Firestore/CosmosDB), queues (SQS/Pub-Sub/Service Bus) |
+| Monitoring/Observability | CloudWatch/Cloud Monitoring/Azure Monitor, alerts, dashboards, logging, tracing |
+| Security compliance | IAM least-privilege, encryption at rest/transit, network rules, compliance frameworks |
+
+### Cost Optimizer Agent
+
+The Cost Optimizer is a **cross-cutting agent** — it reads IaC templates and cloud configs across ALL detected clouds. Always generated when any cloud is detected.
+
+**What it analyzes:**
+
+| Category | Checks |
+|----------|--------|
+| Right-sizing | Oversized instances, over-provisioned databases, memory/CPU waste |
+| Reserved/Committed | Opportunities for reserved instances, committed use discounts, savings plans |
+| Spot/Preemptible | Workloads suitable for spot (AWS), preemptible (GCP), spot (Azure) VMs |
+| Unused resources | Idle load balancers, unattached disks, unused elastic IPs, orphaned snapshots |
+| Architecture patterns | Serverless vs always-on, storage tier optimization, CDN usage, caching layers |
+| Cross-cloud comparison | If multi-cloud: are services deployed on the cheapest provider for the workload? |
+
+**How it integrates into phases:**
+
+```
+Phase 2 (Design):
+  Cost Optimizer reviews architecture.md
+  → Flags expensive patterns before implementation
+  → Suggests cost-efficient alternatives
+
+Phase 5 (Verification):
+  Cost Optimizer reviews all IaC changes
+  → Estimates cost impact of changes
+  → Flags any new resources without cost justification
+  → Produces cost-report.md in run outputs
+```
+
+**Output format** (`.claude/orchestrator/runs/<run>/cost-report.md`):
+
+```markdown
+# Cost Analysis Report
+
+## Summary
+Estimated monthly impact: +$45/month
+
+## Findings
+
+### ⚠ Over-provisioned (3 items)
+- RDS instance: db.r5.xlarge → db.r5.large saves ~$120/month
+- Lambda memory: 1024MB → 256MB sufficient for this workload
+- ECS task: 2 vCPU → 1 vCPU based on utilization patterns
+
+### ✓ Cost-efficient patterns detected
+- Using S3 Intelligent-Tiering for logs ✓
+- Spot instances for batch processing ✓
+
+### 💡 Recommendations
+- Add lifecycle policy to S3 bucket (expire after 90 days)
+- Consider Aurora Serverless v2 for variable-load database
+```
+
+### Cross-Verification for Cloud
+
+Added to Phase 5 verification matrix:
+
+| Verifier | Checks |
+|----------|--------|
+| Cloud Agent A ↔ Cloud Agent B | Cross-cloud networking consistent? Shared resources aligned? |
+| Security → Cloud Agents | IAM least-privilege? Encryption enabled? No public exposure? |
+| Cost Optimizer → Cloud Agents | Cost-efficient choices? No waste? Budget impact acceptable? |
+| Cloud Agent → DevOps | Infra changes deployable via existing CI/CD? |
+
+---
+
+## 17. Future Extensibility
 
 | When | Action |
 |------|--------|
