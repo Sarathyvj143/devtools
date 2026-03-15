@@ -1,0 +1,24 @@
+{
+  "name": "ml-python",
+  "detect": {
+    "files": ["requirements.txt", "pyproject.toml"],
+    "dependencies": ["torch", "tensorflow", "scikit-learn", "transformers", "pandas", "numpy", "xgboost", "lightgbm"],
+    "patterns": ["**/*.py", "**/notebooks/**", "**/*.ipynb", "models/**", "data/**"]
+  },
+  "context": {
+    "framework": "Python ML/AI",
+    "language": "Python",
+    "test_runner": "pytest",
+    "conventions": "Reproducible experiments, version-controlled data pipelines, model versioning"
+  },
+  "agent_customizations": {
+    "developer": {
+      "name_prefix": "ml",
+      "extra_instructions": "Set random seeds for reproducibility. Use virtual environments. Track experiments with MLflow or similar. Version control model artifacts. Document data preprocessing steps."
+    },
+    "tester": {
+      "extra_instructions": "Test data preprocessing pipelines. Validate model input/output shapes. Test for data leakage. Use small synthetic datasets for unit tests."
+    }
+  },
+  "phases": { "skip_ux": true, "skip_devops": false, "parallel_dev_test": false }
+}

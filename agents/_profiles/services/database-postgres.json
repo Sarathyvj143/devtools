@@ -1,0 +1,19 @@
+{
+  "name": "database-postgres",
+  "detect": {
+    "files": ["docker-compose.yml", "docker-compose.yaml"],
+    "dependencies": ["pg", "postgres", "prisma", "typeorm", "sequelize", "knex", "psycopg2", "sqlalchemy"],
+    "patterns": ["**/migrations/**", "**/schema.prisma", "**/models/**"]
+  },
+  "context": {
+    "database": "PostgreSQL",
+    "conventions": "Migrations for schema changes, parameterized queries, connection pooling"
+  },
+  "agent_customizations": {
+    "developer": {
+      "name_prefix": "postgres-db",
+      "extra_instructions": "Always use parameterized queries. Write migrations for schema changes. Use transactions for multi-step operations. Index frequently queried columns."
+    }
+  },
+  "phases": { "skip_ux": true, "skip_devops": true, "parallel_dev_test": true }
+}

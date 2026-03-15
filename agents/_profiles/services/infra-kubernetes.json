@@ -1,0 +1,18 @@
+{
+  "name": "infra-kubernetes",
+  "detect": {
+    "files": [],
+    "dependencies": [],
+    "patterns": ["k8s/**/*.yaml", "k8s/**/*.yml", "kubernetes/**/*.yaml", "manifests/**/*.yaml", "**/kustomization.yaml", "**/Chart.yaml"]
+  },
+  "context": {
+    "tool": "Kubernetes",
+    "conventions": "Namespace isolation, resource limits, readiness/liveness probes, Helm charts or Kustomize"
+  },
+  "agent_customizations": {
+    "devops": {
+      "extra_instructions": "Set resource requests and limits on all containers. Add readiness and liveness probes. Use namespaces for environment isolation. Follow Helm chart best practices if using Helm."
+    }
+  },
+  "phases": { "skip_ux": true, "skip_devops": false, "parallel_dev_test": false }
+}

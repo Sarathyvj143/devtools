@@ -1,0 +1,19 @@
+{
+  "name": "database-mongo",
+  "detect": {
+    "files": [],
+    "dependencies": ["mongoose", "mongodb", "pymongo", "mongoid"],
+    "patterns": ["**/models/**", "**/schemas/**"]
+  },
+  "context": {
+    "database": "MongoDB",
+    "conventions": "Schema validation, indexes on query fields, aggregation pipelines for complex queries"
+  },
+  "agent_customizations": {
+    "developer": {
+      "name_prefix": "mongo-db",
+      "extra_instructions": "Define schemas with validation. Create indexes for frequently queried fields. Use aggregation pipelines instead of multiple queries. Sanitize user inputs to prevent NoSQL injection."
+    }
+  },
+  "phases": { "skip_ux": true, "skip_devops": true, "parallel_dev_test": true }
+}

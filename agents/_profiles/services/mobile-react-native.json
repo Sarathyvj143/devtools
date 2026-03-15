@@ -1,0 +1,21 @@
+{
+  "name": "mobile-react-native",
+  "detect": {
+    "files": ["app.json", "metro.config.js"],
+    "dependencies": ["react-native", "expo"],
+    "patterns": ["**/*.tsx", "**/*.jsx", "ios/**", "android/**"]
+  },
+  "context": {
+    "framework": "React Native",
+    "language": "TypeScript",
+    "test_runner": "jest",
+    "conventions": "Functional components, React Navigation, platform-specific files (.ios.tsx, .android.tsx)"
+  },
+  "agent_customizations": {
+    "developer": {
+      "name_prefix": "rn-mobile",
+      "extra_instructions": "Use platform-specific files when needed. Test on both iOS and Android. Use React Navigation for routing. Handle offline state and network errors."
+    }
+  },
+  "phases": { "skip_ux": false, "skip_devops": false, "parallel_dev_test": true }
+}

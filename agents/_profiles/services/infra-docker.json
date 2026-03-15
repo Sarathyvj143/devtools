@@ -1,0 +1,18 @@
+{
+  "name": "infra-docker",
+  "detect": {
+    "files": ["Dockerfile", "docker-compose.yml", "docker-compose.yaml", ".dockerignore"],
+    "dependencies": [],
+    "patterns": ["**/Dockerfile", "**/docker-compose*.yml"]
+  },
+  "context": {
+    "tool": "Docker",
+    "conventions": "Multi-stage builds, .dockerignore, non-root user, health checks"
+  },
+  "agent_customizations": {
+    "devops": {
+      "extra_instructions": "Use multi-stage builds for production. Pin base image versions. Run as non-root user. Add health checks. Use .dockerignore to minimize context."
+    }
+  },
+  "phases": { "skip_ux": true, "skip_devops": false, "parallel_dev_test": false }
+}
