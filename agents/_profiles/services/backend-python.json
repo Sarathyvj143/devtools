@@ -1,0 +1,28 @@
+{
+  "name": "backend-python",
+  "detect": {
+    "files": ["requirements.txt", "pyproject.toml", "Pipfile", "setup.py"],
+    "dependencies": ["flask", "django", "fastapi", "aiohttp"],
+    "patterns": ["**/*.py", "app/**/*.py", "src/**/*.py"]
+  },
+  "context": {
+    "framework": "Python (Flask/Django/FastAPI)",
+    "language": "Python",
+    "test_runner": "pytest",
+    "conventions": "Type hints, virtual environments, PEP 8 style"
+  },
+  "agent_customizations": {
+    "developer": {
+      "name_prefix": "python-backend",
+      "extra_instructions": "Use type hints on all function signatures. Use Pydantic for data validation (FastAPI) or serializers (Django). Follow existing project structure."
+    },
+    "tester": {
+      "extra_instructions": "Use pytest with fixtures. Use pytest-asyncio for async tests. Use factory_boy or model_bakery for test data. Aim for >80% coverage."
+    }
+  },
+  "phases": {
+    "skip_ux": true,
+    "skip_devops": false,
+    "parallel_dev_test": true
+  }
+}

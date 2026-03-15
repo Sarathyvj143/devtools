@@ -1,0 +1,28 @@
+{
+  "name": "backend-go",
+  "detect": {
+    "files": ["go.mod", "go.sum"],
+    "dependencies": [],
+    "patterns": ["**/*.go", "cmd/**/*.go", "internal/**/*.go", "pkg/**/*.go"]
+  },
+  "context": {
+    "framework": "Go",
+    "language": "Go",
+    "test_runner": "go test",
+    "conventions": "Standard project layout, interfaces for dependency injection, error wrapping"
+  },
+  "agent_customizations": {
+    "developer": {
+      "name_prefix": "go-backend",
+      "extra_instructions": "Follow Go idioms. Use interfaces for testability. Handle all errors explicitly. Use context.Context for cancellation. Follow standard project layout."
+    },
+    "tester": {
+      "extra_instructions": "Use table-driven tests. Use testify for assertions if already in project. Use httptest for HTTP handler tests. Test with race detector: go test -race."
+    }
+  },
+  "phases": {
+    "skip_ux": true,
+    "skip_devops": false,
+    "parallel_dev_test": true
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "backend-node",
+  "detect": {
+    "files": ["package.json"],
+    "dependencies": ["express", "fastify", "koa", "hono", "nestjs"],
+    "patterns": ["src/**/*.ts", "routes/**/*.ts", "controllers/**/*.ts", "api/**/*.ts"]
+  },
+  "context": {
+    "framework": "Node.js (Express/Fastify/Nest)",
+    "language": "TypeScript/JavaScript",
+    "test_runner": "jest or vitest",
+    "conventions": "REST or GraphQL API, middleware pattern, controller-service-repository layers"
+  },
+  "agent_customizations": {
+    "developer": {
+      "name_prefix": "node-backend",
+      "extra_instructions": "Use async/await for all async operations. Validate all inputs at API boundaries. Use proper HTTP status codes. Follow existing middleware patterns."
+    },
+    "tester": {
+      "extra_instructions": "Use supertest for API endpoint testing. Mock database and external services. Test both success and error paths for every endpoint."
+    },
+    "security": {
+      "extra_instructions": "Check for SQL/NoSQL injection in query construction. Verify rate limiting on auth endpoints. Check CORS configuration. Validate JWT handling."
+    }
+  },
+  "phases": {
+    "skip_ux": true,
+    "skip_devops": false,
+    "parallel_dev_test": true
+  }
+}
