@@ -1,0 +1,9 @@
+# Normalize line endings
+* text=auto
+
+# Bash scripts must use LF
+hooks/session-start text eol=lf
+hooks/run-hook.cmd text eol=crlf
+
+# Markdown
+*.md text eol=lf
