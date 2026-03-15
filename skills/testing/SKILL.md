@@ -11,6 +11,36 @@ Comprehensive testing workflow that all tester agents follow. This skill ensures
 
 Before writing ANY tests, always do this first:
 
+### 0. Understand What Was Implemented
+**This is the most critical step.** Before you can test, you must know what was built.
+
+Read these sources in order:
+1. **Developer output** — `{{OUTPUT_DIR}}/developer-output.md` (what was implemented, which files changed)
+2. **Git diff** — run `git diff HEAD~N` to see actual code changes
+3. **Implementation plan** — check `docs/superpowers/plans/` for the task's plan
+4. **Architecture doc** — check `{{OUTPUT_DIR}}/architecture.md` for design decisions
+5. **New/modified files** — run `git diff --name-only HEAD~N` to get the file list
+
+From these, build a **test map:**
+```
+Feature: User Registration
+  Files changed:
+    frontend/src/pages/Register.tsx        (new)
+    frontend/src/components/RegisterForm.tsx (new)
+    backend/src/routes/auth.ts             (modified — added POST /register)
+    backend/src/services/user.service.ts   (new)
+    backend/src/validators/auth.validator.ts (new)
+    database/migrations/001_create_users.sql (new)
+
+  API endpoints:
+    POST /api/auth/register — { email, password, name } → { user, token }
+
+  DB changes:
+    users table — id, email, password_hash, name, created_at
+```
+
+This test map drives ALL test planning. Without it, you're guessing.
+
 ### 1. Scan Existing Tests
 ```
 Find existing test files:
@@ -24,9 +54,10 @@ Find existing test files:
 Understand:
 - Test framework being used (jest, vitest, pytest, go test, etc.)
 - Test patterns and conventions (file naming, describe/it structure, fixtures)
-- Test utilities/helpers already created
-- Mocking patterns in use
+- Test utilities/helpers already created (test factories, custom matchers, fixtures)
+- Mocking patterns in use (MSW, nock, unittest.mock, etc.)
 - Coverage configuration if exists
+- Test directory structure (co-located vs separate `tests/` dir)
 
 ### 2. Scan Test Scripts
 Read project test configuration:
@@ -45,6 +76,33 @@ If MCP servers are available, check for testing tools:
 - Monitoring/observability (Datadog, Grafana MCP)
 
 Use MCP tools when available instead of building from scratch.
+
+### 4. Set Up Test Environment
+
+Before running tests, ensure the test environment is ready:
+
+**Test Database:**
+- Check if a test database config exists (`.env.test`, `DATABASE_URL_TEST`)
+- If not, create one: `<db_name>_test`
+- Run migrations on the test database
+- Each test should use transaction rollback for isolation (preferred) or truncate tables
+
+**Test Data Seeding:**
+- Check for existing seed scripts (`db:seed:test`, `fixtures/`, `factories/`)
+- If none exist, create test data factories:
+  - For Node: use `@faker-js/faker` or test factories
+  - For Python: use `factory_boy` or `model_bakery`
+  - For Go: use test helper functions
+- Seed data should be minimal — only what's needed for the test
+
+**Test Environment Variables:**
+- Check for `.env.test` or test-specific config
+- Ensure test env vars point to test database, not dev
+- Ensure API URLs point to test server, not production
+
+**Docker Test Infrastructure (if applicable):**
+- Check for `docker-compose.test.yml`
+- Start test infrastructure: `docker-compose -f docker-compose.test.yml up -d`
 
 ## Test Planning
 
@@ -102,14 +160,92 @@ For each feature/change, plan tests across ALL these categories:
 - Color contrast
 - Focus management
 
+## Test Execution Order
+
+Write and run tests in this order — faster tests first, slower tests last:
+
+```
+1. Unit tests          (fastest — no external deps)
+   ├── Business logic
+   ├── Utility functions
+   ├── Validators
+   └── Pure component rendering
+          ↓
+2. Integration tests   (moderate — mocked external deps)
+   ├── API endpoint tests (with mocked DB)
+   ├── Component tests (with mocked API)
+   └── Middleware tests
+          ↓
+3. Database tests      (moderate — needs test DB)
+   ├── Migration tests
+   ├── Query tests
+   └── Constraint tests
+          ↓
+4. Contract tests      (needs both services)
+   ├── API request/response shape matching
+   └── Shared type consistency
+          ↓
+5. E2E tests           (slowest — needs all services running)
+   ├── Full user workflows
+   ├── Cross-service data flow
+   └── Auth flow end-to-end
+          ↓
+6. Security tests      (separate pass)
+   ├── Injection attempts
+   ├── Auth bypass
+   └── Data leakage
+          ↓
+7. Performance tests   (separate pass, optional)
+   ├── Response time benchmarks
+   ├── N+1 query detection
+   └── Load handling
+          ↓
+8. Accessibility tests (frontend, separate pass)
+   ├── Keyboard navigation
+   ├── Screen reader
+   └── Color contrast
+```
+
+Stop at first failure within each tier. Fix before moving to next tier.
+
 ## Test Writing Process
 
-1. **Check existing tests** — don't duplicate, extend
-2. **Follow existing patterns** — use same structure, utilities, mocking approach
-3. **Write test plan first** — list all scenarios before writing code
-4. **Write failing tests** — TDD red phase
-5. **Group by feature** — not by type (all login tests together, not all unit tests together)
-6. **Name descriptively** — `should return 401 when token is expired` not `test auth`
+1. **Read developer output** — know exactly what was implemented and what files changed
+2. **Check existing tests** — don't duplicate, extend
+3. **Follow existing patterns** — use same structure, utilities, mocking approach
+4. **Write test plan first** — list ALL scenarios (positive + negative + boundary) before writing code
+5. **Write failing tests** — TDD red phase
+6. **Group by feature** — not by type (all registration tests together, not all unit tests together)
+7. **Name descriptively** — `should return 401 when token is expired` not `test auth`
+8. **Run after each test file** — don't write all tests then run; write a file, run, verify, next file
+
+## Cross-Tester Coordination
+
+When multiple tester agents run in parallel on the same project:
+
+### Shared Knowledge
+- **Frontend tester needs to know:** API endpoints and response shapes (read backend's API docs or developer output)
+- **Backend tester needs to know:** What the frontend sends (read frontend developer's output)
+- **Database tester needs to know:** What queries the backend runs (read backend code)
+- **Integration tester needs to know:** All per-service test results (read their reports)
+
+### Test File Ownership (prevents conflicts)
+Each tester owns specific test directories:
+- Frontend tester → `frontend/src/__tests__/` or `frontend/tests/`
+- Backend tester → `backend/tests/` or `backend/src/__tests__/`
+- Database tester → `tests/db/` or `backend/tests/db/`
+- Integration tester → `tests/integration/` or `tests/e2e/`
+- Cloud tester → `infra/tests/` or `tests/infra/`
+
+**Never write tests outside your owned directory.**
+
+### Test Script Updates (prevents package.json conflicts)
+Only ONE tester should update each service's package.json:
+- Frontend tester updates `frontend/package.json`
+- Backend tester updates `backend/package.json`
+- If monorepo with single package.json: integration tester does the final merge of all test scripts
+- Each tester writes their scripts to `{{OUTPUT_DIR}}/<tester>-scripts.json`
+- Integration tester reads all and merges into the project's config
 
 ## Test Script Management
 
