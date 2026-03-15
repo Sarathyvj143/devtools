@@ -17,6 +17,7 @@
       "extra_instructions": "Use async/await for all async operations. Validate all inputs at API boundaries. Use proper HTTP status codes. Follow existing middleware patterns."
     },
     "tester": {
+      "name_prefix": "node",
       "extra_instructions": "Use supertest for API endpoint testing. Mock database and external services. Test both success and error paths for every endpoint."
     },
     "security": {

@@ -18,6 +18,7 @@
       "extra_instructions": "Use functional components with hooks. Follow React 19 patterns if detected. Prefer composition over inheritance."
     },
     "tester": {
+      "name_prefix": "react",
       "extra_instructions": "Use React Testing Library for component tests. Test user interactions, not implementation details. Use MSW for API mocking."
     },
     "ux-designer": {

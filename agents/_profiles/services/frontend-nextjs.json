@@ -17,6 +17,7 @@
       "extra_instructions": "Prefer Server Components. Use 'use client' only when needed (interactivity, hooks, browser APIs). Use Server Actions for mutations. Follow Next.js data fetching patterns."
     },
     "tester": {
+      "name_prefix": "nextjs",
       "extra_instructions": "Test Server Components with integration tests. Test Client Components with React Testing Library. Test API routes with supertest or fetch mocking."
     }
   },

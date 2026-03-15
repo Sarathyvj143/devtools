@@ -17,6 +17,7 @@
       "extra_instructions": "Follow Go idioms. Use interfaces for testability. Handle all errors explicitly. Use context.Context for cancellation. Follow standard project layout."
     },
     "tester": {
+      "name_prefix": "go",
       "extra_instructions": "Use table-driven tests. Use testify for assertions if already in project. Use httptest for HTTP handler tests. Test with race detector: go test -race."
     }
   },

@@ -17,6 +17,7 @@
       "extra_instructions": "Set random seeds for reproducibility. Use virtual environments. Track experiments with MLflow or similar. Version control model artifacts. Document data preprocessing steps."
     },
     "tester": {
+      "name_prefix": "ml",
       "extra_instructions": "Test data preprocessing pipelines. Validate model input/output shapes. Test for data leakage. Use small synthetic datasets for unit tests."
     }
   },

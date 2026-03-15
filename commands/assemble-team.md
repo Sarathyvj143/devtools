@@ -114,6 +114,38 @@ For each selected agent:
    - Cloud-specific: `{{AWS_SERVICES}}`, `{{CLOUD_PROVIDERS}}`, `{{INFRA_PATHS}}`, etc.
 5. Write to `.claude/agents/<generated-name>.md`
 
+#### Special Handling: Fullstack Tester
+
+When composition profile specifies `fullstack-tester` (multi-service project):
+
+1. Read the tester base template
+2. **Merge instructions from ALL detected service profiles:**
+   - Collect `agent_customizations.tester.extra_instructions` from each service profile
+   - Combine into a single `{{SERVICE_TEST_INSTRUCTIONS}}` block, grouped by service:
+     ```
+     ### Frontend (React) — ./frontend
+     Use React Testing Library for component tests. Test user interactions, not implementation details. Use MSW for API mocking.
+
+     ### Backend (Node.js) — ./backend
+     Use supertest for API endpoint testing. Mock database and external services. Test both success and error paths for every endpoint.
+     ```
+3. Replace `{{SERVICES_UNDER_TEST}}` with a list of all detected services and paths:
+   ```
+   - frontend (React) — ./frontend
+   - backend (Node.js/Express) — ./backend
+   - database (PostgreSQL)
+   ```
+4. Replace `{{TEST_RUNNER}}` with all detected test runners: e.g., "vitest (frontend), jest (backend)"
+5. Replace `{{TECH_STACK}}` with combined tech stack from all services
+6. Name the generated file `fullstack-tester.md`
+
+#### Special Handling: Single-Service Tester
+
+When only one service is detected:
+1. Replace `{{SERVICES_UNDER_TEST}}` with just that service
+2. Replace `{{SERVICE_TEST_INSTRUCTIONS}}` with that profile's `tester.extra_instructions`
+3. Name prefix follows the profile (e.g., `react-tester.md` or just `tester.md`)
+
 ### Step 7: Write team-config.json
 
 Write `.claude/team-config.json` with:

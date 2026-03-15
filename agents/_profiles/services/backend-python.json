@@ -17,6 +17,7 @@
       "extra_instructions": "Use type hints on all function signatures. Use Pydantic for data validation (FastAPI) or serializers (Django). Follow existing project structure."
     },
     "tester": {
+      "name_prefix": "python",
       "extra_instructions": "Use pytest with fixtures. Use pytest-asyncio for async tests. Use factory_boy or model_bakery for test data. Aim for >80% coverage."
     }
   },
