@@ -1,0 +1,17 @@
+{
+  "name": "cloud-pulumi",
+  "detect": {
+    "files": ["Pulumi.yaml"],
+    "dependencies": ["@pulumi/pulumi", "@pulumi/aws", "@pulumi/gcp", "@pulumi/azure-native", "pulumi"],
+    "patterns": ["**/Pulumi.*.yaml"]
+  },
+  "context": {
+    "tool": "Pulumi",
+    "conventions": "Stack configs per environment, component resources for reuse, secrets for sensitive values"
+  },
+  "agent_customizations": {
+    "devops": {
+      "extra_instructions": "Use Pulumi config for environment-specific values. Use secrets provider for sensitive values. Create component resources for reuse. Preview changes before deploying."
+    }
+  }
+}

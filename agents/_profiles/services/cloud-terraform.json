@@ -1,0 +1,17 @@
+{
+  "name": "cloud-terraform",
+  "detect": {
+    "files": ["terraform.tfvars"],
+    "dependencies": [],
+    "patterns": ["**/*.tf", "**/.terraform/**", "**/*.tfstate"]
+  },
+  "context": {
+    "tool": "Terraform",
+    "conventions": "Remote state, pinned provider versions, modules for reuse, plan before apply"
+  },
+  "agent_customizations": {
+    "devops": {
+      "extra_instructions": "Use remote state backend. Pin all provider versions. Use modules for repeated patterns. Run terraform validate and plan before apply. Use workspaces for environment separation."
+    }
+  }
+}

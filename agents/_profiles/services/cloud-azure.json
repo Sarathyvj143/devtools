@@ -1,0 +1,21 @@
+{
+  "name": "cloud-azure",
+  "detect": {
+    "files": ["azure-pipelines.yml", "host.json"],
+    "dependencies": ["@azure", "azure-storage-blob", "azure-identity"],
+    "patterns": [".azure/**", "**/*.bicep", "**/arm-templates/**"],
+    "terraform_provider": "azurerm"
+  },
+  "context": {
+    "cloud": "Azure",
+    "conventions": "RBAC least-privilege, resource tagging, managed identities, Azure Monitor"
+  },
+  "agent_customizations": {
+    "devops": {
+      "extra_instructions": "Use Bicep or Terraform for IaC. Use managed identities over service principals. Configure Azure Monitor alerts. Use Key Vault for secrets."
+    },
+    "security": {
+      "extra_instructions": "Review Azure AD RBAC assignments. Check storage account access policies. Verify network security groups. Check for public endpoints without authentication."
+    }
+  }
+}

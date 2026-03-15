@@ -1,0 +1,21 @@
+{
+  "name": "cloud-aws",
+  "detect": {
+    "files": ["cdk.json", "samconfig.toml", "serverless.yml", "buildspec.yml", "template.yaml"],
+    "dependencies": ["aws-cdk-lib", "@aws-sdk", "boto3", "aws-lambda-powertools"],
+    "patterns": [".aws/**", "**/cloudformation/**/*.yaml", "**/cdk/**/*.ts"],
+    "terraform_provider": "aws"
+  },
+  "context": {
+    "cloud": "AWS",
+    "conventions": "IAM least-privilege, resource tagging, encryption at rest/transit, CloudWatch monitoring"
+  },
+  "agent_customizations": {
+    "devops": {
+      "extra_instructions": "Use AWS CDK or CloudFormation for IaC. Configure CloudWatch alarms for critical metrics. Use Secrets Manager for sensitive values. Enable CloudTrail for audit logging."
+    },
+    "security": {
+      "extra_instructions": "Review IAM policies for least-privilege. Check S3 bucket policies for public access. Verify encryption is enabled on all data stores. Check security groups for overly permissive rules."
+    }
+  }
+}

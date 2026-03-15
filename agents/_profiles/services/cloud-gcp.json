@@ -1,0 +1,21 @@
+{
+  "name": "cloud-gcp",
+  "detect": {
+    "files": ["app.yaml", ".gcloudignore", "firebase.json", ".firebaserc"],
+    "dependencies": ["@google-cloud", "firebase-admin", "google-cloud-storage"],
+    "patterns": ["**/cloud-functions/**", "**/firebase/**"],
+    "terraform_provider": "google"
+  },
+  "context": {
+    "cloud": "GCP",
+    "conventions": "Service account least-privilege, resource labels, encryption by default, Cloud Monitoring"
+  },
+  "agent_customizations": {
+    "devops": {
+      "extra_instructions": "Use Terraform or Deployment Manager for IaC. Configure Cloud Monitoring alerts. Use Secret Manager for sensitive values. Enable Cloud Audit Logs."
+    },
+    "security": {
+      "extra_instructions": "Review service account permissions. Check GCS bucket IAM for public access. Verify VPC Service Controls if applicable. Check firewall rules."
+    }
+  }
+}
