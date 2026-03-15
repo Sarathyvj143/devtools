@@ -9,7 +9,7 @@ Skills, agents, commands, and hooks — one install, every machine.
 
 ```bash
 # Add the marketplace
-/plugin marketplace add your-username/devtools
+/plugin marketplace add Sarathyvj143/devtools
 
 # Install the plugin
 /plugin install devtools@devtools-marketplace

@@ -2,9 +2,9 @@
   "name": "devtools",
   "description": "Personal portable toolkit — skills, agents, commands, and hooks across all projects",
   "version": "1.0.0",
-  "author": { "name": "your-name" },
-  "homepage": "https://github.com/your-username/devtools",
-  "repository": "https://github.com/your-username/devtools",
+  "author": { "name": "Sarathyvj143" },
+  "homepage": "https://github.com/Sarathyvj143/devtools",
+  "repository": "https://github.com/Sarathyvj143/devtools",
   "license": "MIT",
   "keywords": ["toolkit", "skills", "agents", "portable", "personal"]
 }

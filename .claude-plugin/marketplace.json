@@ -1,13 +1,13 @@
 {
   "name": "devtools-marketplace",
-  "owner": { "name": "your-name" },
+  "owner": { "name": "Sarathyvj143" },
   "plugins": [
     {
       "name": "devtools",
       "source": "./",
       "description": "Personal portable toolkit",
       "version": "1.0.0",
-      "author": { "name": "your-name" }
+      "author": { "name": "Sarathyvj143" }
     }
   ]
 }

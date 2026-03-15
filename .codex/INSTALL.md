@@ -5,7 +5,7 @@
 1. Clone the repo:
 
    ```bash
-   git clone https://github.com/your-username/devtools.git ~/.codex/devtools
+   git clone https://github.com/Sarathyvj143/devtools.git ~/.codex/devtools
    ```
 
 2. Symlink skills into Codex's skills directory:
