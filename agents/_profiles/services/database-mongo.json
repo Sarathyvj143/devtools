@@ -15,5 +15,11 @@
       "extra_instructions": "Define schemas with validation. Create indexes for frequently queried fields. Use aggregation pipelines instead of multiple queries. Sanitize user inputs to prevent NoSQL injection."
     }
   },
+  "runner": {
+    "start_command": "docker-compose up -d mongo",
+    "health_check": "mongosh --eval \"db.adminCommand('ping')\"",
+    "default_port": 27017,
+    "startup_order": 1
+  },
   "phases": { "skip_ux": true, "skip_devops": true, "parallel_dev_test": true }
 }

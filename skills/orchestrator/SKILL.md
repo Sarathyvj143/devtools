@@ -59,19 +59,38 @@ Invoke `superpowers:writing-plans` to create implementation plan.
 
 ### Phase 4: Implementation (file-scope isolated parallelism)
 Read team-config.json for service assignments.
+
+**Step 4a: Start services**
+- Dispatch Dev Runner → starts all services in dependency order
+- Dispatch Health Monitor → begins watching service health
+- Dispatch Log Tracker → begins capturing logs
+- Wait for Dev Runner to confirm all services healthy
+
+**Step 4b: Implement**
 - Dispatch developers in parallel ONLY if scoped to different service directories
 - Same-scope developers run sequentially
-- Tester runs AFTER developers complete
 - DevOps runs in parallel if scoped to infra-only files
+- Each developer follows `superpowers:executing-plans`
 
-Each developer follows `superpowers:executing-plans`.
+**Step 4c: Test**
+- Tester runs AFTER developers complete
+- Tester reads Log Tracker output to correlate test failures with service errors
+- Health Monitor reports any service degradation during tests
 
 **Gate:** Dispatch Integration-Verifier agent to check:
 - API contracts match between services
 - All tests pass
-- Deployment config is valid
+- Health Monitor reports all services healthy
+- Log Tracker reports no critical errors
 
 ### Phase 5: Verification (parallel — read-only agents)
+
+**Step 5a: Production verification**
+- Dispatch Prod Runner → builds and starts production mode
+- Health Monitor → validates production health (5-minute sustained check)
+- Log Tracker → captures production logs for errors
+
+**Step 5b: Code verification (parallel — read-only)**
 Dispatch in parallel:
 - Reviewer → writes `verification-report.md`
 - Security Analyst → writes `security-report.md`
@@ -89,6 +108,7 @@ If verification fails, invoke `superpowers:receiving-code-review` for developer 
 
 ### Phase 6: Completion
 - Dispatch Documentation Writer → updates docs
+- Stop Dev Runner / Prod Runner services
 - Invoke `superpowers:finishing-a-development-branch`
 - Write final run-log.md summary
 

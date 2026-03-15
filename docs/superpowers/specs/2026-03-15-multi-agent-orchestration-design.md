@@ -68,6 +68,10 @@ Each phase dispatches fresh subagents (resetting context). The controller mainta
 | 9 | Agent | DevOps | CI/CD, Docker, general deployment | 4 | Read, Write, Edit, Glob, Grep, Bash |
 | 10 | Agent | Documentation Writer | Generates docs, API references, guides | 6 | Read, Write, Edit, Glob, Grep, Bash |
 | 11 | Agent | Cost Optimizer | Cross-cloud cost analysis, right-sizing, waste detection | 5 | Read, Glob, Grep, Bash |
+| 12 | Agent | Dev Runner | Starts services locally, manages ports, dependency order, hot reload | 4 | Read, Write, Edit, Glob, Grep, Bash |
+| 13 | Agent | Production Runner | Builds production bundles, starts prod mode, validates configs | 5 | Read, Write, Edit, Glob, Grep, Bash |
+| 14 | Agent | Log Tracker | Captures logs, correlates errors across services, structured output | 4-5 | Read, Glob, Grep, Bash |
+| 15 | Agent | Health Monitor | Periodic health pings, real-time log watching, alerts on failures | 4-5 | Read, Glob, Grep, Bash |
 
 ### Cloud Agents (generated when cloud providers detected)
 
@@ -116,6 +120,10 @@ devtools/
 │   │   ├── devops.md
 │   │   ├── docs-writer.md
 │   │   ├── cost-optimizer.md
+│   │   ├── dev-runner.md
+│   │   ├── prod-runner.md
+│   │   ├── log-tracker.md
+│   │   ├── health-monitor.md
 │   │   ├── cloud-aws.md
 │   │   ├── cloud-gcp.md
 │   │   ├── cloud-azure.md

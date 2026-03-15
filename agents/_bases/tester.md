@@ -57,6 +57,22 @@ Structure:
 - **Cross-Service Verification** — API contract test results (if multi-service)
 - **Gaps** — any untested areas with justification
 
+## Log Tracker Integration
+
+When running during orchestrated workflow (Phase 4-5):
+1. Before running tests, check if Log Tracker has produced `log-analysis.md`
+2. Read the log analysis for known errors or service issues
+3. If services are unhealthy (check `health-report.md`), flag this before running tests
+4. After tests complete, correlate test failures with log errors:
+   - Read `{{OUTPUT_DIR}}/log-analysis.md` for errors during test execution
+   - Match test failure messages with service error logs
+   - Report correlations: "Test `test_login` failed → Backend log: ConnectionRefusedError at auth:5432"
+5. Include log correlations in the test report under **Log Correlations** section
+
+When running standalone (via `/agent tester`):
+- Check if Log Tracker output exists, use it if available
+- If not available, run tests normally without log correlation
+
 ## Rules
 - Test behavior, not implementation details
 - Each test should test one thing
@@ -64,3 +80,4 @@ Structure:
 - Use descriptive test names that explain the expected behavior
 - Mock external dependencies, not internal code
 - For multi-service: test the actual API contract, not mocked responses
+- Always check service health before running integration tests

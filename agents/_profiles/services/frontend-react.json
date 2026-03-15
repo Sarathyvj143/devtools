@@ -23,6 +23,17 @@
     },
     "ux-designer": {
       "extra_instructions": "Consider React component composition patterns. Design with props/state boundaries in mind. Specify which state is local vs global."
+    },
+    "dev-runner": {
+      "start_command": "npm run dev",
+      "health_endpoint": "http://localhost:3000",
+      "default_port": 3000,
+      "depends_on": []
+    },
+    "prod-runner": {
+      "build_command": "npm run build",
+      "start_command": "npx serve -s build -l 3000",
+      "health_endpoint": "http://localhost:3000"
     }
   },
   "phases": {

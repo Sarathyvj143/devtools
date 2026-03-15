@@ -22,6 +22,17 @@
     },
     "security": {
       "extra_instructions": "Check for SQL/NoSQL injection in query construction. Verify rate limiting on auth endpoints. Check CORS configuration. Validate JWT handling."
+    },
+    "dev-runner": {
+      "start_command": "npm run dev",
+      "health_endpoint": "http://localhost:8080/health",
+      "default_port": 8080,
+      "depends_on": ["database", "redis"]
+    },
+    "prod-runner": {
+      "build_command": "npm run build",
+      "start_command": "NODE_ENV=production node dist/index.js",
+      "health_endpoint": "http://localhost:8080/health"
     }
   },
   "phases": {
