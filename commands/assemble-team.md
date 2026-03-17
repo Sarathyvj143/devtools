@@ -97,9 +97,54 @@ Proceed? (y/customize)
 
 Wait for user confirmation.
 
-### Step 6: Detect Actual Project Commands
+### Step 6: Detect AI Tools and External Assistants
 
-Before generating agents, scan the project to discover the **real commands, ports, and paths** that will be baked into agents. This happens ONCE during assembly — generated agents get concrete commands, not detection logic.
+Before generating agents, detect which AI tools are available:
+
+```bash
+# Gemini CLI
+GEMINI_AVAILABLE="false"
+if which gemini > /dev/null 2>&1; then
+  GEMINI_AVAILABLE="true"
+  GEMINI_VERSION=$(gemini --version 2>/dev/null || echo "unknown")
+  echo "Gemini CLI: available ($GEMINI_VERSION)"
+fi
+
+# Check for Gemini extensions
+ls ~/.gemini/extensions/ 2>/dev/null
+
+# Other AI tools
+which cursor > /dev/null 2>&1 && echo "Cursor: available"
+which copilot > /dev/null 2>&1 && echo "Copilot: available"
+
+# Design MCP servers
+grep -i "figma\|design\|image\|browser\|screenshot" .mcp.json ~/.claude/.mcp.json 2>/dev/null
+```
+
+**Store results in team-config.json:**
+```json
+{
+  "ai_tools": {
+    "gemini": { "available": true, "version": "2.0.0" },
+    "cursor": { "available": false },
+    "design_mcp": { "available": false }
+  }
+}
+```
+
+**When Gemini is available, bake it into these agents:**
+- **UX Designer** → add Gemini design planning commands (user flows, component structure, responsive layouts)
+- **Frontend Developer** → add Gemini implementation planning (component tree from UX spec)
+- **Architect** → add Gemini architecture review (pattern recommendations, security review)
+- **Integration Tester** → add Gemini user flow discovery (E2E test scenarios)
+
+**When Gemini is NOT available:**
+- Agents work without it — all Gemini sections have fallback instructions
+- No impact on functionality, just less AI assistance
+
+### Step 6b: Detect Actual Project Commands
+
+Scan the project to discover the **real commands, ports, and paths** that will be baked into agents. This happens ONCE during assembly — generated agents get concrete commands, not detection logic.
 
 #### 6a: For each service, discover:
 
@@ -208,6 +253,7 @@ For each selected agent:
    - `{{PRODUCTION_COMMANDS}}` — concrete build/start commands for prod-runner
    - `{{SERVICES_UNDER_TEST}}` — list of all services for integration tester
    - `{{SERVICE_TEST_INSTRUCTIONS}}` — merged tester instructions from profiles
+   - `{{AI_TOOLS}}` — detected AI tools and their availability (Gemini, Cursor, design MCP)
    - Cloud-specific: `{{AWS_SERVICES}}`, `{{CLOUD_PROVIDERS}}`, `{{INFRA_PATHS}}`, etc.
    - NOTE: Do NOT replace `{{OUTPUT_DIR}}` — testers resolve the run directory at runtime using `ls -td .claude/orchestrator/runs/*/`
 5. Write to `.claude/agents/<generated-name>.md`
