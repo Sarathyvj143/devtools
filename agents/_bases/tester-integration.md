@@ -32,6 +32,25 @@ RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
 
 The integration tester runs AFTER all per-service testers complete. Their reports should be available.
 
+0. **Read specs first — they define cross-service contracts:**
+   ```bash
+   # OpenAPI spec (shows all endpoints and their contracts)
+   find . -maxdepth 3 -name "openapi*" -o -name "swagger*" 2>/dev/null
+   # GraphQL schema
+   find . -name "schema.graphql" 2>/dev/null
+   # Design spec (from brainstorming — defines user flows)
+   ls docs/superpowers/specs/ 2>/dev/null
+   RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
+   cat "$RUN_DIR/architecture.md" 2>/dev/null
+   # Existing Postman/Insomnia collections (real API usage)
+   find . -name "*.postman_collection.json" -o -name "*.insomnia*.json" 2>/dev/null
+   # Shared types between services
+   find . -name "shared-types*" -o -name "common-types*" -o -name "api-types*" 2>/dev/null
+   ```
+   **If OpenAPI spec exists:** verify every endpoint is covered by E2E tests.
+   **If design spec exists:** every user flow in the spec becomes an E2E test.
+   **If Postman collection exists:** import and run as contract tests.
+
 1. **Read ALL per-service test reports:**
    ```bash
    RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)

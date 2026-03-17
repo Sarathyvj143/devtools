@@ -11,32 +11,167 @@ Comprehensive testing workflow that all tester agents follow. This skill ensures
 
 Before writing ANY tests, always do this first:
 
-### 0. Understand What Was Implemented
-**This is the most critical step.** Before you can test, you must know what was built.
+### 0. Understand What Was Implemented AND How It Should Work
+**This is the most critical step.** Before you can test, you must know what was built AND what the expected behavior is.
 
-Read these sources in order:
-1. **Developer output** — `the current run directory (find with: `ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1`)/developer-output.md` (what was implemented, which files changed)
-2. **Git diff** — run `git diff HEAD~N` to see actual code changes
-3. **Implementation plan** — check `docs/superpowers/plans/` for the task's plan
-4. **Architecture doc** — check `the current run directory (find with: `ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1`)/architecture.md` for design decisions
-5. **New/modified files** — run `git diff --name-only HEAD~N` to get the file list
+#### 0a. Read Specs & Documentation First
 
-From these, build a **test map:**
+Scan for existing specifications and documentation — they define the CONTRACT of what should be tested:
+
+```bash
+# API specs (OpenAPI/Swagger)
+find . -name "openapi*.json" -o -name "openapi*.yaml" -o -name "swagger*.json" -o -name "swagger*.yaml" 2>/dev/null
+# Also check: docs/api/, api-docs/, spec/
+
+# GraphQL schema
+find . -name "schema.graphql" -o -name "*.graphql" 2>/dev/null
+
+# Database schema
+find . -name "schema.prisma" -o -name "*.sql" -path "*/migrations/*" 2>/dev/null
+
+# README and docs
+cat README.md 2>/dev/null | head -100
+ls docs/ 2>/dev/null
+cat CLAUDE.md 2>/dev/null
+
+# Design specs (from brainstorming)
+ls docs/superpowers/specs/ 2>/dev/null
+
+# Type definitions (TypeScript)
+find . -name "*.d.ts" -o -name "types.ts" -o -name "interfaces.ts" 2>/dev/null | head -20
+
+# Validation schemas (Zod, Joi, Yup, Pydantic)
+grep -rl "z\.object\|Joi\.object\|yup\.object\|BaseModel\|@validator" --include="*.ts" --include="*.py" . 2>/dev/null | head -20
+
+# Environment/config documentation
+cat .env.example 2>/dev/null
+```
+
+**If specs exist, use them as the test source of truth:**
+
+| Spec Found | What to Test From It |
+|-----------|---------------------|
+| OpenAPI/Swagger | Every endpoint: path, method, request body schema, response schema, status codes, auth requirements |
+| GraphQL schema | Every query/mutation: input types, return types, nullable fields, error responses |
+| Prisma/DB schema | Every model: required fields, optional fields, unique constraints, relations, defaults |
+| TypeScript types | Every interface: required props, optional props, union types, enum values |
+| Validation schemas (Zod/Joi/Pydantic) | Every validation rule: min/max, patterns, custom validators — test each rule |
+| README | Documented features and expected behaviors |
+| Design spec | Requirements, acceptance criteria, user flows |
+| .env.example | Every env var documented — test with and without each one |
+
+**Example: Testing from an OpenAPI spec:**
+```
+Found: openapi.yaml defines POST /api/auth/register
+  Request body:
+    email: string (required, format: email)
+    password: string (required, minLength: 8)
+    name: string (required, minLength: 1, maxLength: 100)
+  Responses:
+    201: { user: { id, email, name }, token: string }
+    400: { error: "Validation failed", details: [...] }
+    409: { error: "Email already exists" }
+
+  → Generate tests for:
+  ✓ Valid registration → 201 + user + token
+  ✗ Missing email → 400 + validation error mentioning "email"
+  ✗ Invalid email format → 400
+  ✗ Password too short (7 chars) → 400
+  ✗ Password exactly 8 chars → 201 (boundary)
+  ✗ Name empty → 400
+  ✗ Name 100 chars → 201 (boundary)
+  ✗ Name 101 chars → 400 (boundary)
+  ✗ Duplicate email → 409
+```
+
+**Example: Testing from a Zod/Pydantic validation schema:**
+```
+Found: backend/src/validators/auth.validator.ts
+  const registerSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8).max(128),
+    name: z.string().min(1).max(100).trim(),
+  });
+
+  → Generate tests for EACH rule:
+  ✓ Valid data → passes
+  ✗ email: "" → fails (required)
+  ✗ email: "not-an-email" → fails (format)
+  ✗ email: null → fails (type)
+  ✗ password: "1234567" → fails (min 8)
+  ✗ password: "12345678" → passes (exactly 8, boundary)
+  ✗ password: "a".repeat(128) → passes (exactly 128, boundary)
+  ✗ password: "a".repeat(129) → fails (max 128)
+  ✗ name: "" → fails (min 1)
+  ✗ name: "   " → fails (trimmed = empty)
+  ✗ name: "a" → passes (exactly 1, boundary)
+```
+
+#### 0b. Read Developer Output and Git Changes
+
+```bash
+RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
+cat "$RUN_DIR/developer-output.md" 2>/dev/null || echo "No developer output"
+git diff --name-only HEAD~5
+git diff HEAD~5 -- '*.ts' '*.tsx' '*.py' '*.go'
+```
+
+#### 0c. Read Usage Patterns (how the app is actually used)
+
+```bash
+# Check for existing test files — they show what's already tested
+find . -name "*.test.*" -o -name "*.spec.*" -o -name "test_*" 2>/dev/null | head -30
+
+# Check for Storybook (component usage patterns)
+find . -name "*.stories.*" 2>/dev/null | head -10
+
+# Check for example/demo files
+find . -name "example*" -o -name "demo*" -o -name "sample*" 2>/dev/null | head -10
+
+# Check for seed/fixture data (real-world data patterns)
+find . -name "seed*" -o -name "fixture*" -o -name "factory*" 2>/dev/null | head -10
+
+# Check route definitions for what endpoints exist
+grep -rn "router\.\(get\|post\|put\|delete\|patch\)\|@app\.\(route\|get\|post\)\|@router" --include="*.ts" --include="*.py" --include="*.js" . 2>/dev/null | head -30
+
+# Check for existing Postman/Insomnia collections (real usage patterns)
+find . -name "*.postman_collection.json" -o -name "*.insomnia*.json" 2>/dev/null
+```
+
+#### 0d. Build Test Map
+
+Combine ALL sources (specs + developer output + git diff + usage patterns) into a test map:
+
 ```
 Feature: User Registration
+  Spec source: openapi.yaml + backend/src/validators/auth.validator.ts
+
   Files changed:
     frontend/src/pages/Register.tsx        (new)
-    frontend/src/components/RegisterForm.tsx (new)
-    backend/src/routes/auth.ts             (modified — added POST /register)
-    backend/src/services/user.service.ts   (new)
-    backend/src/validators/auth.validator.ts (new)
+    backend/src/routes/auth.ts             (modified)
     database/migrations/001_create_users.sql (new)
 
-  API endpoints:
-    POST /api/auth/register — { email, password, name } → { user, token }
+  API endpoints (from OpenAPI spec):
+    POST /api/auth/register
+      Request: { email: string(email), password: string(8-128), name: string(1-100) }
+      Response 201: { user: { id, email, name }, token: string }
+      Response 400: validation errors
+      Response 409: duplicate email
 
-  DB changes:
-    users table — id, email, password_hash, name, created_at
+  Validation rules (from Zod schema):
+    email: required, email format
+    password: required, min 8, max 128
+    name: required, min 1, max 100, trimmed
+
+  DB changes (from migration):
+    users table: id(pk), email(unique), password_hash, name, created_at
+
+  Test scenarios:
+    Positive: 3 (valid registration, boundary min, boundary max)
+    Negative: 12 (missing fields, invalid format, too short/long, duplicate)
+    Boundary: 6 (exactly at min, exactly at max, one over)
+    Security: 3 (SQL injection, XSS in name, password not in response)
+    Total: 24 test cases for this endpoint
 ```
 
 This test map drives ALL test planning. Without it, you're guessing.

@@ -35,14 +35,34 @@ Test files go in: `{{SERVICE_PATH}}/tests/` or `{{SERVICE_PATH}}/__tests__/`
 
 ## Before Writing Tests
 
-1. **Read developer output:**
+1. **Read specs first — they are the source of truth:**
+   ```bash
+   # OpenAPI/Swagger spec
+   find {{SERVICE_PATH}} . -maxdepth 3 -name "openapi*" -o -name "swagger*" 2>/dev/null
+   # GraphQL schema
+   find {{SERVICE_PATH}} -name "schema.graphql" -o -name "*.graphql" 2>/dev/null
+   # Validation schemas (Zod, Joi, Pydantic)
+   grep -rl "z\.object\|Joi\.object\|BaseModel\|@validator" {{SERVICE_PATH}} --include="*.ts" --include="*.py" 2>/dev/null | head -10
+   # Route definitions
+   grep -rn "router\.\(get\|post\|put\|delete\)\|@app\.\(route\|get\|post\)\|@router" {{SERVICE_PATH}} --include="*.ts" --include="*.py" --include="*.js" 2>/dev/null
+   ```
+   **If OpenAPI spec exists:** generate tests for EVERY endpoint, EVERY status code, EVERY validation rule defined in the spec.
+   **If validation schemas exist (Zod/Joi/Pydantic):** generate tests for EVERY validation rule — min, max, format, required, custom.
+2. **Read developer output:**
    ```bash
    RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
    cat "$RUN_DIR/developer-output.md" 2>/dev/null || echo "No developer output — read git diff instead"
    ```
-2. **Read git diff** — `git diff --name-only` filtered to `{{SERVICE_PATH}}`
-3. **List new endpoints** — read route/controller files, extract every endpoint with method, path, request/response shapes
-4. **Scan existing tests** — understand patterns, mocking approach, test utilities
+3. **Read git diff** — `git diff --name-only` filtered to `{{SERVICE_PATH}}`
+4. **List new endpoints** — from route/controller files, extract every endpoint with method, path, request/response shapes
+5. **Check for existing test patterns:**
+   ```bash
+   # Existing Postman collections (usage patterns)
+   find . -name "*.postman_collection.json" 2>/dev/null
+   # Existing test files
+   find {{SERVICE_PATH}} -name "*.test.*" -o -name "*.spec.*" -o -name "test_*" 2>/dev/null | head -20
+   ```
+6. **Scan existing tests** — understand patterns, mocking approach, test utilities
 
 ## Backend Test Types — Think Like a Veteran
 

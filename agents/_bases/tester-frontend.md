@@ -35,19 +35,41 @@ Test files go in: `{{SERVICE_PATH}}/__tests__/` or `{{SERVICE_PATH}}/tests/`
 
 ## Before Writing Tests
 
-1. **Read developer output:**
+1. **Read specs first — they define what to test:**
+   ```bash
+   # Component prop types (TypeScript interfaces)
+   find {{SERVICE_PATH}} -name "*.d.ts" -o -name "types.ts" -o -name "interfaces.ts" 2>/dev/null | head -10
+   # Validation schemas (Zod, Yup)
+   grep -rl "z\.object\|yup\.object\|Yup\." {{SERVICE_PATH}} --include="*.ts" --include="*.tsx" 2>/dev/null | head -10
+   # Storybook stories (component usage patterns)
+   find {{SERVICE_PATH}} -name "*.stories.*" 2>/dev/null | head -10
+   # Design spec
+   RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
+   cat "$RUN_DIR/ux-spec.md" 2>/dev/null
+   ```
+   **If TypeScript types exist:** test every required prop, optional prop, union type variant.
+   **If validation schemas exist:** test every validation rule — every field, every constraint.
+   **If Storybook stories exist:** use them as test scenarios — each story variant becomes a test case.
+   **If UX spec exists:** test every user flow, every state (loading, error, empty, success).
+
+2. **Read developer output:**
    ```bash
    RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
    cat "$RUN_DIR/developer-output.md" 2>/dev/null || echo "No developer output — read git diff instead"
    ```
-2. **Read git diff** — `git diff --name-only` filtered to `{{SERVICE_PATH}}`
-3. **Read API contract** — check backend developer output or backend source code for API shapes:
+3. **Read git diff** — `git diff --name-only` filtered to `{{SERVICE_PATH}}`
+4. **Read API contract** — check backend source for API shapes:
    ```bash
+   # Check for OpenAPI spec (best source)
+   find . -name "openapi*" -o -name "swagger*" 2>/dev/null
+   # Or read backend route files directly
+   grep -rn "router\.\(get\|post\|put\|delete\)" --include="*.ts" --include="*.js" . 2>/dev/null | head -20
+   # Or check backend test report (if available)
    RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
-   cat "$RUN_DIR/backend-test-report.md" 2>/dev/null || echo "Backend report not ready — read backend source code directly"
+   cat "$RUN_DIR/backend-test-report.md" 2>/dev/null || echo "Backend report not ready — read source directly"
    ```
-   NOTE: If running in parallel with backend tester, read the backend route/controller files directly.
-4. **Scan existing tests** — understand patterns before writing new ones
+   NOTE: If running in parallel with backend tester, read the backend route files or OpenAPI spec directly.
+5. **Scan existing tests** — understand patterns before writing new ones
 
 ## Frontend Test Types — Think Like a Veteran
 
