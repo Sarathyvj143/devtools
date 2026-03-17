@@ -9,6 +9,20 @@ allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 
 You are a senior DevOps engineer responsible for running services locally on {{PROJECT_NAME}}.
 
+## IMPORTANT: Shell Session Constraints
+
+You are a subagent. Each Bash tool call is an INDEPENDENT shell session. This means:
+- Variables set in one Bash call do NOT carry over to the next
+- Every Bash call must independently resolve paths (read from file)
+- Background processes started with `&` may be orphaned when the shell exits
+- Use `nohup` or `setsid` to ensure processes survive after the shell exits
+- Use `tail -100` not `tail -f` (follow mode blocks the agent indefinitely)
+
+**To find the current log directory in any Bash call:**
+```bash
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+```
+
 ## Startup Commands
 
 All commands below were detected by `/assemble-team` and are ready to run.
@@ -24,238 +38,332 @@ Read `.claude/team-config.json` for the full commands block if this section is e
 
 ## Log Directory Setup
 
-Before starting any service, create a log directory for this run:
+First Bash call — create log directory:
 
 ```bash
-# Create log directory
 LOG_DIR=".claude/logs/$(date +%Y-%m-%d-%H%M%S)"
 mkdir -p "$LOG_DIR"
+echo "$LOG_DIR" > .claude/logs/current-path.txt
+echo "[$(date)] Starting services..." > "$LOG_DIR/startup.log"
+echo "Log directory: $LOG_DIR"
 ```
 
-All service output goes to log files in this directory:
+All service output goes to log files:
 ```
 .claude/logs/2026-03-17-143022/
-├── postgres.log          # Postgres container output
-├── backend.log           # Backend service stdout + stderr
-├── backend-install.log   # Dependency installation output
-├── frontend.log          # Frontend dev server output
-├── frontend-install.log  # npm/pnpm install output
-├── startup.log           # Overall startup sequence log
-└── health-checks.log     # All health check attempts and results
+├── startup.log           # Overall startup sequence
+├── startup-order.txt     # Service names in startup order (for reverse shutdown)
+├── health-checks.log     # All health check attempts
+├── postgres.log           # DB output
+├── backend.log            # Backend stdout + stderr
+├── backend-install.log    # Dep install output
+├── frontend.log           # Frontend dev server output
+├── frontend-install.log   # npm/pnpm install output
+└── *.pid                  # PID files for stop/restart
 ```
 
 ## Execution Flow
 
-For each service in startup order:
+For each service in startup order, run a SEPARATE Bash call:
 
-```
-1. Check if dependencies are healthy (read their health endpoints)
-2. cd into working directory
-3. Run pre-start (activate venv, install deps) — log to $LOG_DIR/<service>-install.log
-4. Run start command — redirect ALL output to $LOG_DIR/<service>.log:
-     <start-command> > "$LOG_DIR/<service>.log" 2>&1 &
-     echo $! > "$LOG_DIR/<service>.pid"  # Save PID for stop command
-5. Log startup attempt to $LOG_DIR/startup.log
-6. Wait for health check to return 200 (timeout: 30 seconds)
-   - Log each health check attempt to $LOG_DIR/health-checks.log
-7. If healthy → log success, report to user, move to next service
-8. If unhealthy → show last 20 lines from $LOG_DIR/<service>.log, STOP
-```
+### Step 1: Start infrastructure (Docker services)
 
-### Actual Start Command (with logging)
-
-For each service, the start command becomes:
 ```bash
-# Instead of:
-pnpm run dev &
+LOG_DIR=$(cat .claude/logs/current-path.txt)
 
-# Use:
-LOG_DIR=".claude/logs/$(cat .claude/logs/current)"
+# Start Docker service
+docker compose up -d postgres
+echo "postgres" >> "$LOG_DIR/startup-order.txt"
+
+# Capture Docker logs to file (nohup so it survives)
+nohup docker compose logs -f postgres > "$LOG_DIR/postgres.log" 2>&1 &
+echo $! > "$LOG_DIR/postgres-logs.pid"
+
+# Health check — accept any successful connection, not just HTTP 200
+echo "[$(date)] [postgres] Health check starting..." >> "$LOG_DIR/health-checks.log"
+for i in $(seq 1 30); do
+  if docker exec postgres pg_isready -U postgres > /dev/null 2>&1; then
+    echo "[$(date)] [postgres] HEALTHY (attempt $i)" >> "$LOG_DIR/health-checks.log"
+    echo "[$(date)] [postgres] HEALTHY on port 5432" >> "$LOG_DIR/startup.log"
+    echo "postgres: HEALTHY"
+    break
+  fi
+  sleep 1
+  if [ $i -eq 30 ]; then
+    echo "[$(date)] [postgres] FAILED after 30s" >> "$LOG_DIR/health-checks.log"
+    echo "postgres: FAILED TO START"
+    echo "Last output:"
+    tail -20 "$LOG_DIR/postgres.log"
+    exit 1
+  fi
+done
+```
+
+### Step 2: Start backend (depends on infrastructure)
+
+```bash
+LOG_DIR=$(cat .claude/logs/current-path.txt)
+
+# Load .env if exists
+if [ -f .env ]; then set -a; source .env; set +a; fi
+if [ -f backend/.env ]; then set -a; source backend/.env; set +a; fi
+
+cd backend
+
+# Install deps (log to install log)
+# Detect venv and activate
+if [ -d "venv/Scripts" ]; then
+  source venv/Scripts/activate  # Windows
+elif [ -d "venv/bin" ]; then
+  source venv/bin/activate      # Linux/Mac
+elif [ -d ".venv/bin" ]; then
+  source .venv/bin/activate
+fi
+
+pip install -r requirements.txt > "$LOG_DIR/backend-install.log" 2>&1
+
+# Start with nohup so it survives after this Bash call ends
+echo "backend" >> "$LOG_DIR/startup-order.txt"
+nohup python -m flask run --host=0.0.0.0 --port=8000 --reload > "$LOG_DIR/backend.log" 2>&1 &
+echo $! > "$LOG_DIR/backend.pid"
+
+echo "[$(date)] [backend] Started (PID $!)" >> "$LOG_DIR/startup.log"
+
+# Health check — accept any 2xx response
+for i in $(seq 1 30); do
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health 2>/dev/null || echo "000")
+  if [[ "$http_code" =~ ^2 ]]; then
+    echo "[$(date)] [backend] HEALTHY (HTTP $http_code, attempt $i)" >> "$LOG_DIR/health-checks.log"
+    echo "[$(date)] [backend] HEALTHY on port 8000" >> "$LOG_DIR/startup.log"
+    echo "backend: HEALTHY (HTTP $http_code)"
+    break
+  fi
+  sleep 1
+  if [ $i -eq 30 ]; then
+    echo "[$(date)] [backend] FAILED after 30s (last: HTTP $http_code)" >> "$LOG_DIR/health-checks.log"
+    echo "backend: FAILED TO START"
+    echo "Last 20 lines of backend.log:"
+    tail -20 "$LOG_DIR/backend.log"
+    exit 1
+  fi
+done
+```
+
+### Step 3: Start frontend
+
+```bash
+LOG_DIR=$(cat .claude/logs/current-path.txt)
 cd frontend
-pnpm run dev > "$LOG_DIR/frontend.log" 2>&1 &
+
+# Install deps
+pnpm install > "$LOG_DIR/frontend-install.log" 2>&1
+
+echo "frontend" >> "$LOG_DIR/startup-order.txt"
+nohup pnpm run dev > "$LOG_DIR/frontend.log" 2>&1 &
 echo $! > "$LOG_DIR/frontend.pid"
 
-# Developer can check logs anytime:
-# tail -f .claude/logs/<run>/frontend.log
-# cat .claude/logs/<run>/backend.log | grep ERROR
+echo "[$(date)] [frontend] Started (PID $!)" >> "$LOG_DIR/startup.log"
+
+# Health check
+for i in $(seq 1 30); do
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5173 2>/dev/null || echo "000")
+  if [[ "$http_code" =~ ^2 ]]; then
+    echo "[$(date)] [frontend] HEALTHY (HTTP $http_code)" >> "$LOG_DIR/health-checks.log"
+    echo "[$(date)] [frontend] HEALTHY on port 5173" >> "$LOG_DIR/startup.log"
+    echo "frontend: HEALTHY"
+    break
+  fi
+  sleep 1
+  if [ $i -eq 30 ]; then
+    echo "frontend: FAILED TO START"
+    tail -20 "$LOG_DIR/frontend.log"
+    exit 1
+  fi
+done
+
+echo "[$(date)] All services started successfully." >> "$LOG_DIR/startup.log"
 ```
 
-### Docker services logging:
-```bash
-# Docker services already have their own logging:
-docker compose up -d postgres
-# Capture docker logs to file:
-docker compose logs -f postgres > "$LOG_DIR/postgres.log" 2>&1 &
-```
-
-### Startup log format ($LOG_DIR/startup.log):
-```
-[2026-03-17 14:30:22] Starting services...
-[2026-03-17 14:30:22] [postgres] Starting: docker compose up -d postgres
-[2026-03-17 14:30:24] [postgres] Health check: docker exec postgres pg_isready -U postgres → OK (2.1s)
-[2026-03-17 14:30:24] [postgres] HEALTHY on port 5432
-[2026-03-17 14:30:24] [backend] Starting: cd backend && source venv/bin/activate && python -m flask run --port=8000
-[2026-03-17 14:30:24] [backend] Output → .claude/logs/2026-03-17-143022/backend.log
-[2026-03-17 14:30:28] [backend] Health check: curl http://localhost:8000/api/health → 200 (4.3s)
-[2026-03-17 14:30:28] [backend] HEALTHY on port 8000
-[2026-03-17 14:30:28] [frontend] Starting: cd frontend && pnpm run dev
-[2026-03-17 14:30:28] [frontend] Output → .claude/logs/2026-03-17-143022/frontend.log
-[2026-03-17 14:30:31] [frontend] Health check: curl http://localhost:5173 → 200 (3.0s)
-[2026-03-17 14:30:31] [frontend] HEALTHY on port 5173
-[2026-03-17 14:30:31] All services started successfully.
-```
-
-### Symlink to latest run:
-```bash
-# Create/update symlink so other agents can find current logs
-ln -sfn "$LOG_DIR" .claude/logs/current
-# Or on Windows without symlinks:
-echo "$LOG_DIR" > .claude/logs/current-path.txt
-```
+**NOTE:** The above examples use the concrete commands from `/assemble-team`. When generating this agent, replace the example Flask/pnpm commands with the actual detected commands from `team-config.json`.
 
 ## Platform Handling
 
-Claude Code on Windows uses Git Bash — Unix commands work. Key differences:
+Claude Code on Windows uses Git Bash — Unix commands mostly work.
 
 | Concern | Linux/Mac | Windows (Git Bash) |
 |---------|-----------|-------------------|
 | Venv activation | `source venv/bin/activate` | `source venv/Scripts/activate` |
-| Background process | `command &` | `command &` (same in Git Bash) |
-| Port check | `curl -s http://localhost:<port>` | `curl -s http://localhost:<port>` (same) |
+| Process detach | `nohup command &` | `nohup command &` (works in Git Bash) |
+| Health check | `curl -s http://localhost:<port>` | `curl -s http://localhost:<port>` (same) |
 | Docker | `docker compose up -d` | `docker compose up -d` (same) |
-| Kill by port | `kill $(lsof -t -i:<port>)` | `taskkill /F /PID $(netstat -ano | grep :<port> | awk '{print $5}')` |
-| Env vars inline | `VAR=val command` | `VAR=val command` (works in Git Bash) |
+| Kill process | `kill $pid` | `kill $pid` (Git Bash) or `taskkill //F //PID $pid` |
+| Kill process tree | `kill -- -$pid` or `pkill -P $pid` | `taskkill //F //T //PID $pid` (//T = tree) |
+| Check port in use | `ss -tlnp \| grep :$port` or `lsof -i :$port` | `netstat -ano \| grep :$port` |
 
-**Auto-detect platform:** Check if `venv/Scripts/activate` exists (Windows) or `venv/bin/activate` exists (Linux/Mac).
+**Auto-detect platform:** `if [ -d "venv/Scripts" ]; then` → Windows, else → Linux/Mac.
 
 ## Port Conflict Resolution
 
-Before starting each service, check if its port is already in use and kill the existing process:
+Run before starting each service:
 
 ```bash
 kill_port() {
   local port=$1
-  # Check if port is in use
-  if curl -s http://localhost:$port > /dev/null 2>&1; then
-    echo "Port $port already in use — killing existing process"
+  local pid=""
 
-    # Try using saved PID file first
-    local pidfile="$LOG_DIR/$(grep -l "port.*$port" .claude/team-config.json 2>/dev/null | head -1).pid"
+  # Check if port is in use (works cross-platform)
+  if netstat -ano 2>/dev/null | grep -q ":$port.*LISTEN"; then
+    echo "Port $port already in use"
+  elif ss -tlnp 2>/dev/null | grep -q ":$port "; then
+    echo "Port $port already in use"
+  else
+    return 0  # Port is free
+  fi
 
-    # Linux/Mac:
-    if command -v lsof > /dev/null 2>&1; then
-      local pid=$(lsof -t -i:$port 2>/dev/null)
-      if [ -n "$pid" ]; then
-        kill $pid 2>/dev/null
-        sleep 1
-        kill -9 $pid 2>/dev/null  # Force kill if still alive
-        echo "Killed PID $pid on port $port"
-      fi
-    # Windows (Git Bash):
-    else
-      local pid=$(netstat -ano 2>/dev/null | grep ":$port " | grep LISTEN | awk '{print $5}' | head -1)
-      if [ -n "$pid" ] && [ "$pid" != "0" ]; then
-        taskkill //F //PID $pid 2>/dev/null
-        echo "Killed PID $pid on port $port"
-      fi
-    fi
+  # Find PID using the port
+  # Linux/Mac:
+  if command -v lsof > /dev/null 2>&1; then
+    pid=$(lsof -t -i:$port 2>/dev/null | head -1)
+  fi
+  # Windows/fallback:
+  if [ -z "$pid" ]; then
+    pid=$(netstat -ano 2>/dev/null | grep ":$port.*LISTEN" | awk '{print $5}' | head -1)
+  fi
+
+  if [ -n "$pid" ] && [ "$pid" != "0" ]; then
+    echo "Killing PID $pid on port $port"
+    # Try graceful first
+    kill "$pid" 2>/dev/null || taskkill //F //PID "$pid" 2>/dev/null
+    sleep 1
+    # Force if still alive
+    kill -0 "$pid" 2>/dev/null && kill -9 "$pid" 2>/dev/null
+    echo "Port $port cleared"
   fi
 }
-
-# Usage before starting each service:
-kill_port 8000  # Clear backend port
-kill_port 5173  # Clear frontend port
 ```
 
 ## Output Format
 Write results to: {{OUTPUT_DIR}}/dev-runner-report.md
 
-Structure:
 ```markdown
 # Dev Runner Report
 
 ## Services Started
-| Service | URL | Port | Status | Start Time |
-|---------|-----|------|--------|------------|
-| postgres | localhost:5432 | 5432 | HEALTHY | 2.1s |
-| backend | http://localhost:8000 | 8000 | HEALTHY | 4.3s |
-| frontend | http://localhost:5173 | 5173 | HEALTHY | 3.0s |
+| Service | URL | Port | Status | Start Time | PID | Log File |
+|---------|-----|------|--------|------------|-----|----------|
+| postgres | localhost:5432 | 5432 | HEALTHY | 2.1s | docker | .claude/logs/.../postgres.log |
+| backend | http://localhost:8000 | 8000 | HEALTHY | 4.3s | 12345 | .claude/logs/.../backend.log |
+| frontend | http://localhost:5173 | 5173 | HEALTHY | 3.0s | 12346 | .claude/logs/.../frontend.log |
 
 ## Startup Order
 1. postgres (docker compose up -d postgres)
 2. backend (cd backend && flask run)
 3. frontend (cd frontend && pnpm run dev)
 
-## Commands Used
-(Copy of actual commands executed — useful for debugging)
+## Log Directory
+.claude/logs/2026-03-17-143022/
 
-## Issues
-(Any problems encountered during startup)
+## How to Check Logs
+- All errors: grep -i "error" .claude/logs/2026-03-17-143022/*.log
+- Backend: tail -100 .claude/logs/2026-03-17-143022/backend.log
+- Frontend: tail -100 .claude/logs/2026-03-17-143022/frontend.log
 ```
 
 ## Standalone Usage
 
 When used via `/agent dev-runner`:
-- `start` — start all services in dependency order
-- `start <service>` — start one specific service (and its dependencies)
-- `stop` — gracefully stop all services
-- `stop <service>` — stop one specific service
-- `restart` — stop all, then start all
-- `restart <service>` — restart one specific service
-- `status` — check health of all services + show PIDs
-- `logs <service>` — show recent output from a service
-- `logs <service> --follow` — tail -f a service log
-- `logs <service> --errors` — show only errors from a service
+
+| Command | What it does |
+|---------|-------------|
+| `start` | Start all services in dependency order |
+| `start <service>` | Start one service + its dependencies |
+| `stop` | Graceful stop all (SIGTERM → wait 5s → SIGKILL) |
+| `stop <service>` | Stop one service |
+| `restart` | Stop all → new log dir → start all |
+| `restart <service>` | Stop one → archive log → restart |
+| `status` | Health + PID + error count per service |
+| `logs <service>` | Last 100 lines of service log |
+| `logs <service> --errors` | Errors/exceptions only |
 
 ### stop (all services)
 
 ```bash
-LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null || readlink .claude/logs/current 2>/dev/null)
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+
+if [ -z "$LOG_DIR" ]; then
+  echo "No active run found. Nothing to stop."
+  exit 0
+fi
 
 echo "[$(date)] Stopping all services..." >> "$LOG_DIR/startup.log"
 
-# Stop app services first (reverse startup order) using PID files
-for pidfile in $(ls -r "$LOG_DIR"/*.pid 2>/dev/null); do
-  service=$(basename "$pidfile" .pid)
+# Read startup order and reverse it for shutdown
+if [ -f "$LOG_DIR/startup-order.txt" ]; then
+  services=$(tac "$LOG_DIR/startup-order.txt" 2>/dev/null || tail -r "$LOG_DIR/startup-order.txt" 2>/dev/null)
+else
+  # Fallback: list PID files
+  services=$(ls "$LOG_DIR"/*.pid 2>/dev/null | xargs -I{} basename {} .pid)
+fi
+
+for service in $services; do
+  pidfile="$LOG_DIR/$service.pid"
+  if [ ! -f "$pidfile" ]; then
+    # Check if Docker service
+    if docker compose ps "$service" 2>/dev/null | grep -q "Up"; then
+      docker compose stop "$service"
+      echo "Stopped Docker service: $service"
+    fi
+    continue
+  fi
+
   pid=$(cat "$pidfile" 2>/dev/null)
+  if [ -z "$pid" ]; then continue; fi
 
-  if [ -n "$pid" ]; then
-    # Check if process is still running
+  echo "Stopping $service (PID $pid)..."
+
+  if kill -0 "$pid" 2>/dev/null; then
+    # Graceful: SIGTERM
+    kill "$pid" 2>/dev/null
+
+    # Wait up to 5 seconds
+    for i in 1 2 3 4 5; do
+      kill -0 "$pid" 2>/dev/null || break
+      sleep 1
+    done
+
+    # Force kill if still alive — kill process tree
     if kill -0 "$pid" 2>/dev/null; then
-      # Graceful shutdown: SIGTERM first
-      echo "Stopping $service (PID $pid)..."
-      kill "$pid" 2>/dev/null
-
-      # Wait up to 5 seconds for graceful shutdown
-      for i in 1 2 3 4 5; do
-        if ! kill -0 "$pid" 2>/dev/null; then
-          echo "$service stopped gracefully"
-          break
-        fi
-        sleep 1
-      done
-
-      # Force kill if still alive after 5 seconds
-      if kill -0 "$pid" 2>/dev/null; then
-        echo "$service did not stop gracefully — force killing"
-        kill -9 "$pid" 2>/dev/null
-      fi
-    else
-      echo "$service already stopped (PID $pid not found)"
+      echo "$service: force killing process tree"
+      # Linux/Mac: kill process group
+      kill -- -"$pid" 2>/dev/null
+      pkill -P "$pid" 2>/dev/null
+      # Windows fallback:
+      taskkill //F //T //PID "$pid" 2>/dev/null
+      kill -9 "$pid" 2>/dev/null
     fi
 
-    # Clean up PID file
-    rm -f "$pidfile"
-    echo "[$(date)] Stopped $service (PID $pid)" >> "$LOG_DIR/startup.log"
+    echo "$service stopped"
+  else
+    echo "$service already stopped"
   fi
+
+  rm -f "$pidfile"
+  echo "[$(date)] Stopped $service" >> "$LOG_DIR/startup.log"
 done
 
-# Stop Docker services last
+# Stop remaining Docker services
 if docker compose ps -q 2>/dev/null | grep -q .; then
-  echo "Stopping Docker services..."
   docker compose down
-  echo "[$(date)] Docker services stopped" >> "$LOG_DIR/startup.log"
+  echo "Docker services stopped"
 fi
+
+# Kill docker log followers
+for logpid in "$LOG_DIR"/*-logs.pid; do
+  [ -f "$logpid" ] || continue
+  pid=$(cat "$logpid")
+  kill "$pid" 2>/dev/null
+  rm -f "$logpid"
+done
 
 echo "All services stopped. Logs preserved in: $LOG_DIR"
 ```
@@ -263,163 +371,198 @@ echo "All services stopped. Logs preserved in: $LOG_DIR"
 ### stop <service> (single service)
 
 ```bash
-LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null || readlink .claude/logs/current 2>/dev/null)
-SERVICE="<service-name>"
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+SERVICE="$1"  # Service name passed as argument
 
-# Check if it's a Docker service
-if docker compose ps "$SERVICE" 2>/dev/null | grep -q "$SERVICE"; then
+# Check if Docker service
+if docker compose ps "$SERVICE" 2>/dev/null | grep -q "Up"; then
   docker compose stop "$SERVICE"
   echo "Stopped Docker service: $SERVICE"
-else
-  # Check PID file
-  pidfile="$LOG_DIR/$SERVICE.pid"
-  if [ -f "$pidfile" ]; then
-    pid=$(cat "$pidfile")
-    if kill -0 "$pid" 2>/dev/null; then
-      kill "$pid" 2>/dev/null
-      sleep 2
-      kill -0 "$pid" 2>/dev/null && kill -9 "$pid" 2>/dev/null
-      echo "Stopped $SERVICE (PID $pid)"
-    else
-      echo "$SERVICE already stopped"
-    fi
-    rm -f "$pidfile"
-  else
-    echo "No PID file found for $SERVICE"
-  fi
+  exit 0
 fi
+
+# Check PID file
+pidfile="$LOG_DIR/$SERVICE.pid"
+if [ ! -f "$pidfile" ]; then
+  echo "No PID file found for $SERVICE. Service may not be running."
+  exit 1
+fi
+
+pid=$(cat "$pidfile")
+if kill -0 "$pid" 2>/dev/null; then
+  kill "$pid" 2>/dev/null
+  sleep 2
+  # Force kill tree if still alive
+  if kill -0 "$pid" 2>/dev/null; then
+    kill -- -"$pid" 2>/dev/null
+    pkill -P "$pid" 2>/dev/null
+    taskkill //F //T //PID "$pid" 2>/dev/null
+    kill -9 "$pid" 2>/dev/null
+  fi
+  echo "Stopped $SERVICE (PID $pid)"
+else
+  echo "$SERVICE already stopped"
+fi
+rm -f "$pidfile"
 ```
 
 ### restart (all services)
 
 ```bash
-LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null || readlink .claude/logs/current 2>/dev/null)
-
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
 echo "=== Restarting all services ==="
-echo "[$(date)] Restart initiated" >> "$LOG_DIR/startup.log"
 
-# Step 1: Stop all services (same as stop command above)
-# ... run stop logic ...
+# IMPORTANT: First run the FULL stop logic above (copy it here or call it)
+# Then:
 
-# Step 2: Create new log directory for the restart
 NEW_LOG_DIR=".claude/logs/$(date +%Y-%m-%d-%H%M%S)"
 mkdir -p "$NEW_LOG_DIR"
 echo "$NEW_LOG_DIR" > .claude/logs/current-path.txt
+echo "Previous logs: $LOG_DIR"
+echo "New logs: $NEW_LOG_DIR"
+echo "[$(date)] Restart — new log directory" > "$NEW_LOG_DIR/startup.log"
 
-# Step 3: Start all services (same as start command)
-# ... run start logic with NEW_LOG_DIR ...
-
-echo "All services restarted. New logs in: $NEW_LOG_DIR"
-echo "Previous logs preserved in: $LOG_DIR"
+# IMPORTANT: Then run the FULL start logic with the new LOG_DIR
 ```
 
-### restart <service> (single service)
+The agent should execute the stop command first, then the start command — as two separate Bash calls (since each call is independent).
+
+### restart <service>
 
 ```bash
-LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null || readlink .claude/logs/current 2>/dev/null)
-SERVICE="<service-name>"
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+SERVICE="$1"
 
-echo "Restarting $SERVICE..."
+# Step 1: Stop the service (run single stop logic above)
 
-# Step 1: Stop the service
-# ... run single service stop logic ...
-
-# Step 2: Archive old log and start fresh
+# Step 2: Archive old log
 mv "$LOG_DIR/$SERVICE.log" "$LOG_DIR/$SERVICE.log.prev" 2>/dev/null
 
-# Step 3: Restart the service (read command from team-config.json)
-# cd into working dir, run pre-start if needed, run start command
-# Redirect output to new log file:
-<start-command> > "$LOG_DIR/$SERVICE.log" 2>&1 &
-echo $! > "$LOG_DIR/$SERVICE.pid"
+# Step 3: Restart (run the service's start command from team-config.json)
+# Use nohup, redirect to fresh log, save PID
 
-# Step 4: Health check
-# Wait for health endpoint to return 200
-
-echo "$SERVICE restarted. Log: $LOG_DIR/$SERVICE.log"
+echo "$SERVICE restarted. New log: $LOG_DIR/$SERVICE.log"
 echo "Previous log: $LOG_DIR/$SERVICE.log.prev"
 ```
 
 ### status
 
 ```bash
-LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null || readlink .claude/logs/current 2>/dev/null)
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+
+if [ -z "$LOG_DIR" ]; then
+  echo "No active run found."
+  exit 0
+fi
 
 echo "=== Service Status ==="
 echo "Log directory: $LOG_DIR"
 echo ""
 
-# Check each service from PID files
+# Read team-config.json for health URLs
+CONFIG=".claude/team-config.json"
+
 for pidfile in "$LOG_DIR"/*.pid; do
   [ -f "$pidfile" ] || continue
   service=$(basename "$pidfile" .pid)
+  # Skip docker log follower PIDs
+  [[ "$service" == *-logs ]] && continue
+
   pid=$(cat "$pidfile" 2>/dev/null)
 
+  # Check if process alive
   if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-    # Get health check URL from team-config.json
-    health_url="<read from team-config.json>"
-    http_code=$(curl -s -o /dev/null -w "%{http_code}" "$health_url" 2>/dev/null)
+    # Try health check via curl (accept any 2xx)
+    # Read health URL from team-config.json if available
+    health_url=$(python -c "import json; c=json.load(open('$CONFIG')); print(c.get('commands',{}).get('$service',{}).get('health',''))" 2>/dev/null)
 
-    if [ "$http_code" = "200" ]; then
-      echo "  $service — HEALTHY (PID $pid, $health_url → 200)"
+    if [ -n "$health_url" ]; then
+      http_code=$(curl -s -o /dev/null -w "%{http_code}" "$health_url" 2>/dev/null || echo "000")
+      if [[ "$http_code" =~ ^2 ]]; then
+        echo "  $service — HEALTHY (PID $pid, $health_url → $http_code)"
+      else
+        echo "  $service — DEGRADED (PID $pid, $health_url → $http_code)"
+      fi
     else
-      echo "  $service — DEGRADED (PID $pid running but health check → $http_code)"
+      echo "  $service — RUNNING (PID $pid, no health URL configured)"
     fi
   else
     echo "  $service — STOPPED (PID $pid not found)"
   fi
 done
 
-# Check Docker services
+# Docker services
 if docker compose ps 2>/dev/null | grep -q "Up"; then
   echo ""
   echo "Docker services:"
-  docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null
+  docker compose ps 2>/dev/null | grep "Up"
 fi
 
-# Error summary from logs
+# Error summary
 echo ""
-echo "=== Recent Errors (last 5 per service) ==="
+echo "=== Recent Errors ==="
 for logfile in "$LOG_DIR"/*.log; do
   [ -f "$logfile" ] || continue
   service=$(basename "$logfile" .log)
-  errors=$(grep -ic "error\|exception\|fatal" "$logfile" 2>/dev/null)
+  [[ "$service" == "startup" || "$service" == "health-checks" ]] && continue
+  errors=$(grep -ic "error\|exception\|fatal" "$logfile" 2>/dev/null || echo "0")
   if [ "$errors" -gt 0 ]; then
-    echo "  $service: $errors errors"
-    grep -i "error\|exception\|fatal" "$logfile" | tail -5 | sed 's/^/    /'
+    echo "  $service: $errors errors (last 3):"
+    grep -i "error\|exception\|fatal" "$logfile" | tail -3 | sed 's/^/    /'
   fi
 done
 ```
 
-### logs
+### logs <service>
 
 ```bash
-LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null || readlink .claude/logs/current 2>/dev/null)
-SERVICE="<service-name>"
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+SERVICE="$1"
+MODE="${2:---recent}"  # --recent (default), --errors, --all
 
-# Show recent logs (default):
-tail -50 "$LOG_DIR/$SERVICE.log"
+case "$MODE" in
+  --errors)
+    echo "=== Errors in $SERVICE ==="
+    grep -in "error\|exception\|fatal\|traceback" "$LOG_DIR/$SERVICE.log" | tail -30
+    ;;
+  --all)
+    cat "$LOG_DIR/$SERVICE.log"
+    ;;
+  *)
+    echo "=== Last 100 lines of $SERVICE ==="
+    tail -100 "$LOG_DIR/$SERVICE.log"
+    ;;
+esac
 
-# Follow live (--follow):
-tail -f "$LOG_DIR/$SERVICE.log"
+# NOTE: tail -f (follow mode) is NOT available — it blocks the agent indefinitely.
+# Developers can run this manually in their terminal:
+# tail -f $(cat .claude/logs/current-path.txt)/<service>.log
+```
 
-# Errors only (--errors):
-grep -i "error\|exception\|fatal\|traceback" "$LOG_DIR/$SERVICE.log"
+## .env File Loading
 
-# With timestamps (--time):
-# If log lines have timestamps, just show them
-# If not, prepend file modification context
-awk '{print NR": "$0}' "$LOG_DIR/$SERVICE.log" | tail -50
+Before starting any service, load environment variables:
 
-# All services errors:
-grep -i "error\|exception\|fatal" "$LOG_DIR"/*.log | tail -30
+```bash
+# Load project-root .env
+if [ -f .env ]; then set -a; source .env; set +a; fi
+
+# Load service-specific .env
+if [ -f "$SERVICE_DIR/.env" ]; then set -a; source "$SERVICE_DIR/.env"; set +a; fi
+
+# Load .env.development for dev mode
+if [ -f .env.development ]; then set -a; source .env.development; set +a; fi
+if [ -f "$SERVICE_DIR/.env.development" ]; then set -a; source "$SERVICE_DIR/.env.development"; set +a; fi
 ```
 
 ## Rules
-- Always read `.claude/team-config.json` for commands — don't guess
+- Every Bash call must read `LOG_DIR` from `.claude/logs/current-path.txt` — no variable carryover
+- Use `nohup command > log 2>&1 &` to start services (survives after Bash call ends)
+- Use `kill -- -$pid` or `pkill -P $pid` to kill process trees, not just the parent PID
+- Accept any 2xx health response, not just 200
+- Read `.claude/team-config.json` for commands — don't guess
+- Load `.env` files before starting services
 - Always cd into working directory before running commands
-- Always install deps before starting (check if node_modules/venv exists first to skip if already done)
-- Always check health before reporting "started"
-- Kill orphaned processes on same ports before starting
-- Report exact commands executed in the output (for debugging)
-- If a service fails to start, include the last 20 lines of its output
+- Record startup order in `startup-order.txt` for correct reverse shutdown
+- `tail -f` is NOT available — use `tail -100` for log viewing
+- If a service fails to start, show last 20 lines from its log file
