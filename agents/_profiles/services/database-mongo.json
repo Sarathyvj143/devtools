@@ -13,6 +13,10 @@
     "developer": {
       "name_prefix": "mongo-db",
       "extra_instructions": "Define schemas with validation. Create indexes for frequently queried fields. Use aggregation pipelines instead of multiple queries. Sanitize user inputs to prevent NoSQL injection."
+    },
+    "tester": {
+      "name_prefix": "mongo-db",
+      "extra_instructions": "Test schema validation rules. Test index usage with explain(). Test aggregation pipeline results. Test for NoSQL injection with $gt/$ne payloads. Use transaction rollback or dropDatabase for test isolation."
     }
   },
   "runner": {

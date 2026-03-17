@@ -3,7 +3,8 @@
   "requires_min": 3,
   "team": {
     "per_service_developers": true,
-    "always": ["fullstack-tester", "reviewer", "architect"],
+    "always": ["reviewer", "architect"],
+    "testers": ["per-service-testers", "integration-tester"],
     "recommended": ["devops", "security", "docs-writer", "cost-optimizer"],
     "optional": ["ux-designer", "researcher", "requirements"]
   },

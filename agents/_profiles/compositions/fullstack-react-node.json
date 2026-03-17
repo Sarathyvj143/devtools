@@ -3,7 +3,8 @@
   "requires": ["frontend-react", "backend-node"],
   "team": {
     "per_service_developers": true,
-    "always": ["react-frontend-developer", "node-backend-developer", "fullstack-tester", "reviewer"],
+    "always": ["react-frontend-developer", "node-backend-developer", "reviewer"],
+    "testers": ["react-frontend-tester", "node-backend-tester", "integration-tester"],
     "recommended": ["architect", "devops", "security"],
     "optional": ["ux-designer", "docs-writer", "researcher", "requirements", "cost-optimizer"]
   },

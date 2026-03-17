@@ -13,6 +13,10 @@
     "developer": {
       "name_prefix": "postgres-db",
       "extra_instructions": "Always use parameterized queries. Write migrations for schema changes. Use transactions for multi-step operations. Index frequently queried columns."
+    },
+    "tester": {
+      "name_prefix": "postgres-db",
+      "extra_instructions": "Test migrations up and down. Test unique constraints with duplicate inserts. Test foreign key cascades. Use EXPLAIN ANALYZE to verify index usage. Use transaction rollback for test isolation."
     }
   },
   "runner": {

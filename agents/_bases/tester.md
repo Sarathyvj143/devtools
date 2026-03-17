@@ -86,7 +86,11 @@ Update package.json / pyproject.toml / Makefile with:
 - `test:unit` / `test:integration` / `test:e2e` — by category
 
 ## Output Format
-Write results to: {{OUTPUT_DIR}}/test-report.md
+Write results to the current run directory:
+```bash
+RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
+# Write to: $RUN_DIR/test-report.md
+```
 
 ## Rules
 - Always invoke `devtools:testing` skill first

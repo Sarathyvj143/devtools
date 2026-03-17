@@ -15,10 +15,10 @@ Before writing ANY tests, always do this first:
 **This is the most critical step.** Before you can test, you must know what was built.
 
 Read these sources in order:
-1. **Developer output** — `{{OUTPUT_DIR}}/developer-output.md` (what was implemented, which files changed)
+1. **Developer output** — `the current run directory (find with: `ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1`)/developer-output.md` (what was implemented, which files changed)
 2. **Git diff** — run `git diff HEAD~N` to see actual code changes
 3. **Implementation plan** — check `docs/superpowers/plans/` for the task's plan
-4. **Architecture doc** — check `{{OUTPUT_DIR}}/architecture.md` for design decisions
+4. **Architecture doc** — check `the current run directory (find with: `ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1`)/architecture.md` for design decisions
 5. **New/modified files** — run `git diff --name-only HEAD~N` to get the file list
 
 From these, build a **test map:**
@@ -259,7 +259,7 @@ Only ONE tester should update each service's package.json:
 - Frontend tester updates `frontend/package.json`
 - Backend tester updates `backend/package.json`
 - If monorepo with single package.json: integration tester does the final merge of all test scripts
-- Each tester writes their scripts to `{{OUTPUT_DIR}}/<tester>-scripts.json`
+- Each tester writes their scripts to `the current run directory (find with: `ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1`)/<tester>-scripts.json`
 - Integration tester reads all and merges into the project's config
 
 ## Test Script Management
@@ -308,19 +308,28 @@ test-coverage:
 
 ## Coverage Enforcement
 
-| Metric | Minimum Threshold |
-|--------|------------------|
-| Line coverage | 80% |
-| Branch coverage | 70% |
-| Function coverage | 85% |
-| Critical paths | 100% (auth, payment, data mutation) |
+Thresholds apply to **new/changed code only** — not the entire project. An existing project with 30% coverage won't suddenly fail.
+
+| Metric | New Code Threshold | Aspirational Project Goal |
+|--------|-------------------|--------------------------|
+| Line coverage | 80% | 70%+ |
+| Branch coverage | 70% | 60%+ |
+| Function coverage | 85% | 75%+ |
+| Critical paths (auth, payment, data mutation) | 100% | 100% |
 
 After running tests, check coverage:
 1. Run coverage command
-2. Parse coverage report
-3. If below threshold, identify uncovered lines
+2. Parse coverage report — focus on files changed in this task
+3. If new code is below threshold, identify uncovered lines
 4. Write tests for uncovered critical paths first
 5. Report coverage per service (for multi-service projects)
+6. Report both: "New code: 92% lines" and "Overall project: 45% lines"
+
+**Match test depth to task scope:**
+- Bug fix → unit tests + the specific failing case
+- Small feature → unit + integration tests
+- Large feature → full test suite (unit + integration + E2E + security)
+- Don't run performance/accessibility tests for a one-line bug fix
 
 ## Feature-Based Test Coordination
 
@@ -369,7 +378,7 @@ Check `.mcp.json` and `~/.claude/.mcp.json` for available servers.
 
 ## Output Format
 
-Write results to: `{{OUTPUT_DIR}}/test-report.md`
+Write results to: `the current run directory (find with: `ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1`)/test-report.md`
 
 ```markdown
 # Test Report — [Feature Name]

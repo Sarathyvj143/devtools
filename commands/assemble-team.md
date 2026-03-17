@@ -202,8 +202,14 @@ For each selected agent:
    - `{{CONVENTIONS}}` — read CLAUDE.md if exists + profile conventions
    - `{{SERVICE_NAME}}` / `{{SERVICE_PATH}}` — from detection result (actual path)
    - `{{TEST_RUNNER}}` — actual test command discovered (e.g., "pnpm run test")
-   - `{{OUTPUT_DIR}}` — `.claude/orchestrator/runs/<current-run>/`
+   - `{{TEST_COMMANDS}}` — concrete test run commands (e.g., "cd backend && python -m pytest tests/ -v")
+   - `{{DATABASE_TYPE}}` — detected database type (e.g., "PostgreSQL", "MongoDB")
+   - `{{STARTUP_COMMANDS}}` — concrete service startup commands for dev-runner
+   - `{{PRODUCTION_COMMANDS}}` — concrete build/start commands for prod-runner
+   - `{{SERVICES_UNDER_TEST}}` — list of all services for integration tester
+   - `{{SERVICE_TEST_INSTRUCTIONS}}` — merged tester instructions from profiles
    - Cloud-specific: `{{AWS_SERVICES}}`, `{{CLOUD_PROVIDERS}}`, `{{INFRA_PATHS}}`, etc.
+   - NOTE: Do NOT replace `{{OUTPUT_DIR}}` — testers resolve the run directory at runtime using `ls -td .claude/orchestrator/runs/*/`
 5. Write to `.claude/agents/<generated-name>.md`
 
 #### Special Handling: Dev Runner

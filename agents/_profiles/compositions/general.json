@@ -3,7 +3,8 @@
   "requires": [],
   "team": {
     "per_service_developers": false,
-    "always": ["developer", "tester", "reviewer"],
+    "always": ["developer", "reviewer"],
+    "testers": ["tester"],
     "recommended": ["architect", "security"],
     "optional": ["ux-designer", "devops", "docs-writer", "researcher", "requirements", "cost-optimizer"]
   },

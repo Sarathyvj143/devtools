@@ -43,5 +43,21 @@ You are a senior developer working on {{PROJECT_NAME}}.
 - No hardcoded secrets or environment-specific values
 - Handle errors explicitly — no silent failures
 
-## Output
-Write implementation summary to: {{OUTPUT_DIR}}/developer-output.md
+## Output — REQUIRED
+
+After completing implementation, you MUST write a summary for tester agents.
+
+```bash
+RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
+# Write to: $RUN_DIR/developer-output.md
+```
+
+The developer-output.md MUST include:
+- **Files created/modified** — full paths
+- **API endpoints added/changed** — method, path, request/response shapes
+- **Database changes** — new tables, columns, migrations
+- **Dependencies added** — new packages installed
+- **Environment variables** — new env vars needed
+- **How to test** — suggested test scenarios
+
+This file is read by ALL tester agents. Without it, testers have to guess what was implemented.

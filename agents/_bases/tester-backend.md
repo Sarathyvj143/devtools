@@ -27,10 +27,21 @@ You are a senior backend test engineer working on {{PROJECT_NAME}}.
 Test ONLY backend code in {{SERVICE_PATH}}. Do not modify frontend or infrastructure code.
 Test files go in: `{{SERVICE_PATH}}/tests/` or `{{SERVICE_PATH}}/__tests__/`
 
+## IMPORTANT: Shell Session Constraints
+Each Bash tool call is an independent shell session. Variables don't carry over.
+To find the current run output directory:
+```bash
+RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
+```
+
 ## Before Writing Tests
 
-1. **Read developer output** — check `{{OUTPUT_DIR}}/developer-output.md` for what was implemented
-2. **Read git diff** — run `git diff --name-only` filtered to `{{SERVICE_PATH}}` to see changed files
+1. **Read developer output:**
+   ```bash
+   RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
+   cat "$RUN_DIR/developer-output.md" 2>/dev/null || echo "No developer output — read git diff instead"
+   ```
+2. **Read git diff** — `git diff --name-only` filtered to `{{SERVICE_PATH}}`
 3. **List new endpoints** — from the changed route/controller files, extract all new/modified endpoints with their request/response shapes
 4. **Scan existing tests** — understand patterns, mocking approach, test utilities before writing
 
@@ -171,4 +182,8 @@ Only update files within `{{SERVICE_PATH}}` — never touch other services' conf
 - If Database MCP available → use for direct DB assertions
 
 ## Output
-Write results to: {{OUTPUT_DIR}}/backend-test-report.md
+Write results to the current run directory:
+```bash
+RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
+# Write to: $RUN_DIR/backend-test-report.md
+```
