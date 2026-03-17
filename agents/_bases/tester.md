@@ -54,10 +54,21 @@ If MCP tools available, prefer them over manual implementations.
 
 ## Log Tracker Integration
 
-When running during orchestrated workflow (Phase 4-5):
-1. Before running tests, check `health-report.md` — are services healthy?
-2. After tests, read `log-analysis.md` to correlate failures with service errors
-3. Report correlations: "Test `test_login` failed → Backend: ConnectionRefusedError at :5432"
+Service logs are captured by Dev Runner in `.claude/logs/`. Use them to debug test failures.
+
+```bash
+# Find log directory
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null || readlink .claude/logs/current 2>/dev/null)
+```
+
+Before running tests:
+1. Check services healthy: `grep "HEALTHY" "$LOG_DIR/startup.log"`
+2. Check for existing errors: `grep -i "error" "$LOG_DIR"/*.log`
+
+After test failures:
+1. Read service logs: `grep -i "error\|exception" "$LOG_DIR/backend.log" | tail -20`
+2. Correlate: "Test `test_login` failed → backend.log: ConnectionRefusedError at :5432"
+3. Include log file paths in test report so developer can read full context
 
 ## Coverage Enforcement
 - Line coverage: minimum 80%

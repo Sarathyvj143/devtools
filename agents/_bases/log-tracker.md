@@ -20,18 +20,49 @@ You are a senior observability engineer responsible for log analysis on {{PROJEC
 
 ## Log Sources
 
-Detect and read logs from:
-- **Process stdout/stderr** — from running services
-- **Log files** — check common locations:
+### Primary: Dev Runner Log Directory (preferred)
 
-  | Location | Linux/Mac | Windows |
-  |----------|-----------|---------|
-  | App logs | `logs/`, `log/`, `*.log` | `logs\`, `log\`, `*.log` |
-  | System logs | `/var/log/`, `tmp/logs/` | `%APPDATA%\logs\`, `%TEMP%\logs\` |
-  | Docker | `docker logs <container>` | `docker logs <container>` (same) |
-  | Docker Compose | `docker compose logs <service>` | `docker compose logs <service>` (same) |
+The Dev Runner captures ALL service output to `.claude/logs/`. Always check here first:
 
-  **Note:** Use `docker compose` (v2, space) not `docker-compose` (v1, hyphen) for cross-platform.
+```bash
+# Find current log directory
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null || readlink .claude/logs/current 2>/dev/null)
+
+# Available logs:
+$LOG_DIR/
+├── startup.log           # Startup sequence with timestamps
+├── health-checks.log     # All health check attempts
+├── postgres.log           # Database output
+├── backend.log            # Backend service output (stdout + stderr)
+├── backend-install.log    # Dependency install output
+├── frontend.log           # Frontend dev server output
+├── frontend-install.log   # npm/pnpm install output
+└── *.pid                  # PID files for running processes
+```
+
+**To read logs:**
+```bash
+# All errors across all services:
+grep -i "error\|exception\|fatal\|traceback" "$LOG_DIR"/*.log
+
+# Specific service:
+cat "$LOG_DIR/backend.log"
+
+# Recent lines:
+tail -100 "$LOG_DIR/backend.log"
+
+# Follow live (during test execution):
+tail -f "$LOG_DIR/backend.log"
+```
+
+### Secondary: Other Log Locations
+
+If Dev Runner logs are not available (standalone usage), check:
+
+| Location | Linux/Mac | Windows |
+|----------|-----------|---------|
+| App logs | `logs/`, `log/`, `*.log` | `logs\`, `log\`, `*.log` |
+| Docker | `docker compose logs <service>` | `docker compose logs <service>` (same) |
 
 - **Framework-specific:**
   - Node: check for winston, pino, morgan log output

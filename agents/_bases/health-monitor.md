@@ -67,18 +67,46 @@ On Windows, database tools are typically inside Docker containers. Use `docker e
 
 ## Real-Time Log Watching
 
+### Where to read logs
+
+All service output is captured by Dev Runner in `.claude/logs/`:
+
+```bash
+# Find current log directory
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null || readlink .claude/logs/current 2>/dev/null)
+
+# Watch all logs for errors:
+tail -f "$LOG_DIR"/*.log | grep -i "error\|exception\|fatal\|oom\|refused\|timeout"
+
+# Watch specific service:
+tail -f "$LOG_DIR/backend.log"
+
+# Check if process is still alive (using saved PID):
+for pidfile in "$LOG_DIR"/*.pid; do
+  service=$(basename "$pidfile" .pid)
+  pid=$(cat "$pidfile")
+  if kill -0 "$pid" 2>/dev/null; then
+    echo "$service: RUNNING (PID $pid)"
+  else
+    echo "$service: DEAD (PID $pid was not found)"
+  fi
+done
+```
+
+### What to watch for
+
 Monitor logs for:
 - **FATAL / CRITICAL** — service is down or about to crash
 - **ERROR** — something failed, may affect functionality
 - **OutOfMemoryError / OOM** — service needs more memory
 - **Connection refused** — dependency is down
 - **Timeout** — service or dependency is too slow
-- **Crash / restart loop** — service keeps dying
+- **Crash / restart loop** — service keeps dying (PID file exists but process is dead)
 
 When detected:
-1. Capture the full error context (5 lines before and after)
-2. Identify which service is affected
-3. Check if dependent services are also affected
+1. Read the full error context from the log file (5 lines before and after)
+2. Identify which service is affected (from which log file the error came)
+3. Check if dependent services are also affected (read their logs too)
 4. Report immediately
 
 ## Health Report Format

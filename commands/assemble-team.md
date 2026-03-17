@@ -332,10 +332,12 @@ Write `.claude/team-config.json` with:
 - `phase_config` — from composition profile
 - `project_snapshot` — file count, dependency hash, last commit
 - `commands` — all discovered commands per service (start, test, build, health check, port)
+- `log_dir` — path pattern for service logs: `.claude/logs/<timestamp>/`
 
 Example `commands` section in team-config.json:
 ```json
 {
+  "log_dir_pattern": ".claude/logs",
   "commands": {
     "postgres": {
       "start": "docker compose up -d postgres",
