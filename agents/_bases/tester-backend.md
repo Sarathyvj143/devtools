@@ -98,8 +98,56 @@ For EVERY endpoint, test:
 - Large dataset handling (pagination)
 - Concurrent request handling
 
+## How to Actually Run Tests
+
+### For Node.js Backend:
+```bash
+cd {{SERVICE_PATH}}
+
+# Detect package manager (check lockfile)
+# Install deps
+<pkg-manager> install
+
+# Run tests
+<pkg-manager> run test                    # all tests
+<pkg-manager> run test -- --coverage      # with coverage
+npx vitest run tests/unit                 # unit only
+npx vitest run tests/integration          # integration only
+```
+
+### For Python Backend:
+```bash
+cd {{SERVICE_PATH}}
+
+# Activate virtual environment
+source venv/bin/activate          # Linux/Mac
+source venv/Scripts/activate      # Windows (Git Bash)
+
+# Install test deps
+python -m pip install -r requirements-test.txt  # or requirements-dev.txt
+# If no separate test requirements: python -m pip install pytest pytest-cov
+
+# Run tests
+python -m pytest tests/ -v                           # all tests
+python -m pytest tests/ -v --cov=src --cov-report=term  # with coverage
+python -m pytest tests/unit/ -v                       # unit only
+python -m pytest tests/integration/ -v                # integration only
+```
+
+### For Go Backend:
+```bash
+cd {{SERVICE_PATH}}
+
+go test ./... -v                    # all tests
+go test ./... -v -race              # with race detector
+go test ./... -coverprofile=coverage.out  # with coverage
+go tool cover -func=coverage.out    # print coverage summary
+```
+
 ## Test Script Updates
-Ensure backend has:
+After writing tests, update `{{SERVICE_PATH}}/package.json` (Node) or `{{SERVICE_PATH}}/pyproject.toml` (Python):
+
+Node:
 ```json
 {
   "test": "vitest run",
@@ -109,12 +157,14 @@ Ensure backend has:
 }
 ```
 
-Or for Python:
+Python (`pyproject.toml`):
 ```toml
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --cov=src --cov-report=term --cov-fail-under=80"
 ```
+
+Only update files within `{{SERVICE_PATH}}` — never touch other services' configs.
 
 ## MCP Integration
 - If API Client MCP available → use for contract testing

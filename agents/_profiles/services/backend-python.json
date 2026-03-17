@@ -21,19 +21,48 @@
       "extra_instructions": "Use pytest with fixtures. Use pytest-asyncio for async tests. Use factory_boy or model_bakery for test data. Aim for >80% coverage."
     },
     "dev-runner": {
-      "start_command": "python -m flask run --reload",
-      "alt_commands": ["uvicorn app.main:app --reload --port 8000", "python manage.py runserver"],
-      "health_endpoint": "http://localhost:8000/health",
+      "pre_start": [
+        "Detect and activate virtual environment: check for venv/, .venv/, env/, or Pipfile",
+        "If venv exists: source venv/bin/activate (Linux) or venv\\Scripts\\activate (Windows)",
+        "If no venv: python -m venv venv && activate it",
+        "Install deps: python -m pip install -r requirements.txt (or pipenv install / poetry install)"
+      ],
+      "detect_start_command": {
+        "check_order": [
+          { "if_file_exists": "manage.py", "command": "python manage.py runserver 0.0.0.0:8000", "framework": "Django" },
+          { "if_dependency": "fastapi", "command": "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000", "framework": "FastAPI" },
+          { "if_dependency": "flask", "command": "python -m flask run --host=0.0.0.0 --port=8000 --reload", "framework": "Flask" },
+          { "if_dependency": "aiohttp", "command": "python -m aiohttp.web app:app --port 8000", "framework": "aiohttp" },
+          { "fallback": "python app.py" }
+        ]
+      },
+      "health_endpoint_detection": [
+        "Try: curl http://localhost:8000/health",
+        "Try: curl http://localhost:8000/api/health",
+        "Try: curl http://localhost:8000/healthz",
+        "Try: curl http://localhost:8000/",
+        "First 200 response wins"
+      ],
       "default_port": 8000,
-      "depends_on": ["database"]
+      "depends_on": ["database"],
+      "working_directory": "Detect: if service is in a subdirectory (e.g., ./backend/), cd into it before running"
     },
     "prod-runner": {
-      "build_command": "python -m pip install -r requirements.txt",
-      "start_command_linux": "gunicorn -w 4 -b 0.0.0.0:8000 app:app",
-      "start_command_windows": "waitress-serve --port=8000 app:app",
-      "start_command_cross_platform": "uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4",
-      "note": "gunicorn does NOT work on Windows — use waitress or uvicorn instead",
-      "health_endpoint": "http://localhost:8000/health"
+      "build_command": "python -m pip install -r requirements.txt --no-dev",
+      "detect_start_command": {
+        "linux": [
+          { "if_dependency": "gunicorn", "command": "gunicorn -w 4 -b 0.0.0.0:8000 app:app" },
+          { "if_dependency": "uvicorn", "command": "uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4" },
+          { "fallback": "python app.py" }
+        ],
+        "windows": [
+          { "if_dependency": "waitress", "command": "waitress-serve --port=8000 app:app" },
+          { "if_dependency": "uvicorn", "command": "uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4" },
+          { "fallback": "python app.py" }
+        ],
+        "note": "gunicorn does NOT work on Windows — use waitress or uvicorn"
+      },
+      "health_endpoint": "Same detection as dev-runner"
     }
   },
   "phases": {

@@ -24,15 +24,50 @@
       "extra_instructions": "Check for SQL/NoSQL injection in query construction. Verify rate limiting on auth endpoints. Check CORS configuration. Validate JWT handling."
     },
     "dev-runner": {
-      "start_command": "npm run dev",
-      "health_endpoint": "http://localhost:8080/health",
+      "pre_start": [
+        "Detect package manager: check for pnpm-lock.yaml (pnpm), yarn.lock (yarn), package-lock.json (npm)",
+        "Install deps: <pkg-manager> install"
+      ],
+      "detect_start_command": {
+        "check_order": [
+          { "if_script_exists": "dev", "command": "<pkg-manager> run dev" },
+          { "if_script_exists": "start:dev", "command": "<pkg-manager> run start:dev" },
+          { "if_script_exists": "start", "command": "<pkg-manager> start" },
+          { "if_dependency": "nodemon", "command": "npx nodemon src/index.ts" },
+          { "if_dependency": "ts-node-dev", "command": "npx ts-node-dev src/index.ts" },
+          { "fallback": "node src/index.js" }
+        ],
+        "note": "Replace <pkg-manager> with detected: npm, pnpm, or yarn"
+      },
+      "health_endpoint_detection": [
+        "Try: curl http://localhost:8080/health",
+        "Try: curl http://localhost:8080/api/health",
+        "Try: curl http://localhost:3001/health",
+        "Try: curl http://localhost:8080/",
+        "First 200 response wins"
+      ],
       "default_port": 8080,
-      "depends_on": ["database", "redis"]
+      "depends_on": ["database", "redis"],
+      "working_directory": "Detect: if backend is in a subdirectory (e.g., ./backend/), cd into it"
     },
     "prod-runner": {
-      "build_command": "npm run build",
-      "start_command": "NODE_ENV=production node dist/index.js",
-      "health_endpoint": "http://localhost:8080/health"
+      "detect_build_command": {
+        "check_order": [
+          { "if_script_exists": "build", "command": "<pkg-manager> run build" },
+          { "if_dependency": "typescript", "command": "npx tsc" },
+          { "fallback": "No build step needed (plain JS)" }
+        ]
+      },
+      "detect_start_command": {
+        "check_order": [
+          { "if_script_exists": "start:prod", "command": "<pkg-manager> run start:prod" },
+          { "if_dir_exists": "dist", "command": "node dist/index.js" },
+          { "if_file_exists": "src/index.js", "command": "node src/index.js" },
+          { "fallback": "node index.js" }
+        ],
+        "env": "Use .env.production file or cross-env NODE_ENV=production"
+      },
+      "health_endpoint": "Same detection as dev-runner"
     }
   },
   "phases": {

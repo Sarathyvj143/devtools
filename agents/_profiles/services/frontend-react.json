@@ -25,14 +25,45 @@
       "extra_instructions": "Consider React component composition patterns. Design with props/state boundaries in mind. Specify which state is local vs global."
     },
     "dev-runner": {
-      "start_command": "npm run dev",
-      "health_endpoint": "http://localhost:3000",
+      "pre_start": [
+        "Detect package manager: check for pnpm-lock.yaml (pnpm), yarn.lock (yarn), package-lock.json (npm)",
+        "Install deps: <pkg-manager> install"
+      ],
+      "detect_start_command": {
+        "check_order": [
+          { "if_script_exists": "dev", "command": "<pkg-manager> run dev" },
+          { "if_script_exists": "start", "command": "<pkg-manager> start" },
+          { "if_dependency": "vite", "command": "npx vite" },
+          { "if_dependency": "next", "command": "npx next dev" },
+          { "fallback": "npx vite" }
+        ],
+        "note": "Replace <pkg-manager> with detected: npm, pnpm, or yarn"
+      },
+      "health_endpoint_detection": [
+        "Try: curl http://localhost:3000",
+        "Try: curl http://localhost:5173 (Vite default)",
+        "First 200 response wins"
+      ],
       "default_port": 3000,
-      "depends_on": []
+      "depends_on": [],
+      "working_directory": "Detect: if frontend is in a subdirectory (e.g., ./frontend/), cd into it"
     },
     "prod-runner": {
-      "build_command": "npm run build",
-      "start_command": "npx serve -s build -l 3000",
+      "detect_build_command": {
+        "check_order": [
+          { "if_script_exists": "build", "command": "<pkg-manager> run build" },
+          { "if_dependency": "vite", "command": "npx vite build" },
+          { "if_dependency": "next", "command": "npx next build" }
+        ]
+      },
+      "detect_start_command": {
+        "check_order": [
+          { "if_dependency": "next", "command": "npx next start -p 3000" },
+          { "if_dir_exists": "dist", "command": "npx serve -s dist -l 3000" },
+          { "if_dir_exists": "build", "command": "npx serve -s build -l 3000" },
+          { "note": "If serve not installed, run: npm install -g serve OR npx serve" }
+        ]
+      },
       "health_endpoint": "http://localhost:3000"
     }
   },

@@ -76,8 +76,52 @@ Test files go in: `{{SERVICE_PATH}}/__tests__/` or `{{SERVICE_PATH}}/tests/`
 - Loading states during API calls
 - Retry logic on network failure
 
+## How to Actually Run Tests
+
+### Step 1: Detect test runner
+```
+Read package.json in {{SERVICE_PATH}}:
+  If devDependencies has "vitest" → use vitest
+  If devDependencies has "jest"   → use jest
+  If scripts.test exists          → use that script
+  Fallback: npx vitest
+```
+
+### Step 2: Detect package manager
+```
+In {{SERVICE_PATH}}:
+  pnpm-lock.yaml → pnpm
+  yarn.lock      → yarn
+  package-lock.json → npm
+```
+
+### Step 3: Run commands
+```bash
+# cd into service directory first!
+cd {{SERVICE_PATH}}
+
+# Install test deps if needed
+<pkg-manager> install
+
+# Run unit + component tests
+<pkg-manager> run test          # or: npx vitest run
+<pkg-manager> run test:coverage # or: npx vitest run --coverage
+
+# Run E2E (if playwright installed)
+npx playwright install --with-deps  # first time only
+npx playwright test
+```
+
+### Step 4: Read results
+```bash
+# Coverage report location:
+#   vitest: coverage/ directory
+#   jest: coverage/lcov-report/index.html
+# Parse coverage summary for threshold check
+```
+
 ## Test Script Updates
-Ensure frontend has:
+After writing tests, update `{{SERVICE_PATH}}/package.json` scripts:
 ```json
 {
   "test": "vitest run",
@@ -87,6 +131,8 @@ Ensure frontend has:
   "test:e2e": "playwright test"
 }
 ```
+
+Only update `{{SERVICE_PATH}}/package.json` — never touch other services' configs.
 
 ## MCP Integration
 - If Playwright MCP available → use for E2E and visual regression

@@ -86,13 +86,56 @@ Before running DB tests:
 - Use transactions for test isolation (rollback after each test)
 - Seed data scripts work correctly
 
+## How to Actually Run DB Tests
+
+### Step 1: Set up test database
+```bash
+# Check if test DB config exists
+cat .env.test 2>/dev/null || echo "No .env.test found"
+
+# For Postgres (via Docker):
+docker compose exec postgres createdb -U postgres myapp_test 2>/dev/null || true
+
+# For Mongo (via Docker):
+# No explicit creation needed — MongoDB creates on first use
+
+# Run migrations on test DB
+# Node (Prisma): DATABASE_URL=<test_url> npx prisma migrate deploy
+# Node (Knex):   DATABASE_URL=<test_url> npx knex migrate:latest
+# Python (Alembic): DATABASE_URL=<test_url> alembic upgrade head
+# Python (Django):  DATABASE_URL=<test_url> python manage.py migrate
+```
+
+### Step 2: Run tests
+```bash
+# Node:
+DATABASE_URL=<test_url> <pkg-manager> run test:db
+# Or: DATABASE_URL=<test_url> npx vitest run tests/db/
+
+# Python:
+DATABASE_URL=<test_url> python -m pytest tests/db/ -v
+
+# Go:
+DATABASE_URL=<test_url> go test ./tests/db/... -v
+```
+
+### Windows Note:
+```bash
+# In Git Bash (Claude Code on Windows), env vars inline work:
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/myapp_test npx vitest run tests/db/
+
+# In cmd.exe (if ever needed):
+set DATABASE_URL=postgresql://postgres:postgres@localhost:5432/myapp_test && npx vitest run tests/db/
+```
+
 ## Test Script Updates
-Add database-specific test commands:
+Add database-specific test commands to the BACKEND service's package.json (not root):
 ```json
 {
   "test:db": "vitest run --dir tests/db",
   "test:migrations": "vitest run tests/db/migrations",
-  "db:seed:test": "node scripts/seed-test-data.js"
+  "db:seed:test": "node scripts/seed-test-data.js",
+  "db:test:setup": "DATABASE_URL=$DATABASE_URL_TEST npx prisma migrate deploy"
 }
 ```
 
