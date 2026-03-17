@@ -117,7 +117,8 @@ devtools/
 │   │   ├── researcher.md
 │   │   ├── architect.md
 │   │   ├── ux-designer.md
-│   │   ├── developer.md
+│   │   ├── developer.md                 # Generic developer (backend, etc.)
+│   │   ├── developer-frontend.md        # Frontend developer (has Gemini/AI design integration)
 │   │   ├── tester.md                  # Generic tester (fallback)
 │   │   ├── tester-frontend.md         # Frontend-specific tester
 │   │   ├── tester-backend.md          # Backend-specific tester

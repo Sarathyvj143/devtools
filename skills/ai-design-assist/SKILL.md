@@ -103,12 +103,19 @@ If no external AI tools are available:
 
 ## When to Use This Skill
 
+**ONLY for frontend and UI/UX related agents. NOT for backend, database, devops, security, etc.**
+
 | Agent | When to invoke |
 |-------|---------------|
 | UX Designer | Always — before writing ux-spec.md |
 | Frontend Developer | When implementing UI components — for layout/structure planning |
-| Architect | When designing frontend architecture — for state management/component boundaries |
-| Integration Tester | When planning E2E tests — for user flow discovery |
+
+Do NOT use this skill for:
+- Backend developers (no UI work)
+- Database testers (no visual design)
+- DevOps agents (no frontend)
+- Security analysts (no design)
+- Architect (uses own domain knowledge, not AI design tools)
 
 ## Rules
 - AI suggestions are a STARTING POINT, not the final answer

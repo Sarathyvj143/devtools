@@ -132,15 +132,20 @@ grep -i "figma\|design\|image\|browser\|screenshot" .mcp.json ~/.claude/.mcp.jso
 }
 ```
 
-**When Gemini is available, bake it into these agents:**
-- **UX Designer** → add Gemini design planning commands (user flows, component structure, responsive layouts)
-- **Frontend Developer** → add Gemini implementation planning (component tree from UX spec)
-- **Architect** → add Gemini architecture review (pattern recommendations, security review)
-- **Integration Tester** → add Gemini user flow discovery (E2E test scenarios)
+**When Gemini is available, bake it into ONLY frontend/UI agents:**
+- **UX Designer** → add Gemini design planning (user flows, component structure, responsive layouts, accessibility review)
+- **Frontend Developer** → add Gemini implementation planning (component tree from UX spec, responsive layout)
+
+**NOT added to:** backend developer, database tester, devops, security, architect, etc.
 
 **When Gemini is NOT available:**
-- Agents work without it — all Gemini sections have fallback instructions
-- No impact on functionality, just less AI assistance
+- Frontend/UX agents work without it — all Gemini sections have fallback instructions
+- No impact on functionality, just less AI assistance for UI work
+
+**Frontend developer template selection:**
+- If frontend service detected AND Gemini available → use `developer-frontend.md` (has Gemini integration)
+- If frontend service detected AND no Gemini → use `developer-frontend.md` (Gemini sections have fallbacks)
+- For non-frontend services → always use generic `developer.md` (no Gemini)
 
 ### Step 6b: Detect Actual Project Commands
 
