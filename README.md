@@ -43,8 +43,38 @@ Memories are also auto-detected during sessions (corrections, preferences, disco
 
 ## Updating
 
+### Update the plugin (new skills, agents, profiles)
 ```bash
 /plugin update devtools
+```
+
+### Update project agents after plugin update
+When the plugin updates, your project's generated agents (`.claude/agents/`) still have the old templates.
+The session-start hook will notify you automatically:
+
+```
+DevTools plugin updated since agents were generated.
+Run /assemble-team --update to refresh agents.
+```
+
+To update project agents:
+```bash
+# Smart update — regenerate from new templates, keep project context
+/assemble-team --update
+
+# Full regenerate from scratch
+/assemble-team --regenerate
+
+# Just audit — check for project drift, don't update templates
+/assemble-team
+```
+
+### Full update flow
+```
+1. You update devtools repo → push to GitHub
+2. On each machine: /plugin update devtools
+3. Next session in any project: hook detects plugin is newer
+4. Run /assemble-team --update → agents regenerated with latest templates
 ```
 
 ## Adding a New Skill

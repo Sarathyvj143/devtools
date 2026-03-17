@@ -2,7 +2,7 @@
   "name": "devtools",
   "displayName": "DevTools",
   "description": "Personal portable toolkit — skills, agents, commands, and hooks across all projects",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": { "name": "Sarathyvj143" },
   "license": "MIT",
   "skills": "./skills/",

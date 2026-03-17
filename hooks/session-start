@@ -24,10 +24,21 @@ escape_for_json() {
 
 using_devtools_escaped=$(escape_for_json "$using_devtools_content")
 
+# Check if project has generated agents that are outdated
+update_notice=""
+if [ -f ".claude/team-config.json" ]; then
+    plugin_commit=$(cd "${PLUGIN_ROOT}" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    generated_commit=$(python -c "import json; print(json.load(open('.claude/team-config.json')).get('plugin_commit','unknown')[:7])" 2>/dev/null || echo "unknown")
+
+    if [ "$plugin_commit" != "unknown" ] && [ "$generated_commit" != "unknown" ] && [ "$plugin_commit" != "$generated_commit" ]; then
+        update_notice="\\n\\n<update-notice>DevTools plugin has been updated since this project's agents were generated (generated: ${generated_commit}, current: ${plugin_commit}). Run /assemble-team --update to refresh agents with latest templates.</update-notice>"
+    fi
+fi
+
 # Auto-memory detection instructions
 memory_instructions="Watch for these patterns during our conversation:\\n- If I correct your approach, offer to save as a feedback memory\\n- If you discover a project convention, offer to save as a project memory\\n- If I state a tool/style preference, offer to save as a user memory\\n- If we solve a tricky bug, offer to save the root cause as a reference memory\\n\\nAlways ask before saving. Format: \\\"Want me to remember this for future sessions?\\\""
 
-session_context="<IMPORTANT>\\nYou have devtools installed.\\n\\n${using_devtools_escaped}\\n\\n<auto-memory>\\n${memory_instructions}\\n</auto-memory>\\n</IMPORTANT>"
+session_context="<IMPORTANT>\\nYou have devtools installed.\\n\\n${using_devtools_escaped}\\n\\n<auto-memory>\\n${memory_instructions}\\n</auto-memory>${update_notice}\\n</IMPORTANT>"
 
 # Output context injection as JSON
 # Claude Code sets CLAUDE_PLUGIN_ROOT — emit only hookSpecificOutput

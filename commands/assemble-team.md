@@ -12,11 +12,82 @@ $ARGUMENTS
 
 Analyze the current project, detect services and technologies, and generate a team of project-specific agents.
 
-### Step 1: Check for Existing Team
+### Step 1: Check for Existing Team and Plugin Version
 
 Check if `.claude/agents/` and `.claude/team-config.json` exist.
 
-**If agents exist** (re-run / audit mode):
+#### 1a: Check Plugin Version
+
+```bash
+# Get current plugin version (from devtools plugin install path)
+PLUGIN_PATH=$(python -c "
+import json
+d=json.load(open('$HOME/.claude/plugins/installed_plugins.json'))
+for k,v in d.items():
+  if 'devtools' in k:
+    print(v[0]['installPath'])
+" 2>/dev/null)
+
+PLUGIN_VERSION=$(python -c "
+import json
+print(json.load(open('$PLUGIN_PATH/.claude-plugin/plugin.json'))['version'])
+" 2>/dev/null)
+
+# Get plugin's last update timestamp (git commit date)
+PLUGIN_COMMIT=$(cd "$PLUGIN_PATH" && git rev-parse HEAD 2>/dev/null)
+PLUGIN_DATE=$(cd "$PLUGIN_PATH" && git log -1 --format=%ci 2>/dev/null)
+
+echo "Plugin version: $PLUGIN_VERSION"
+echo "Plugin commit: $PLUGIN_COMMIT"
+echo "Plugin updated: $PLUGIN_DATE"
+```
+
+#### 1b: Compare with Generated Agents
+
+```bash
+# Read team-config.json for when agents were generated
+if [ -f .claude/team-config.json ]; then
+  GENERATED_WITH=$(python -c "
+import json
+c=json.load(open('.claude/team-config.json'))
+print(c.get('plugin_version','unknown'))
+print(c.get('plugin_commit','unknown'))
+print(c.get('generated_at','unknown'))
+" 2>/dev/null)
+  echo "Agents generated with: $GENERATED_WITH"
+fi
+```
+
+#### 1c: Determine Action
+
+| Situation | Action |
+|-----------|--------|
+| No agents exist | First run → go to Step 2 |
+| Plugin commit matches team-config → project unchanged | "Team is up to date" → audit only for project drift |
+| Plugin commit CHANGED since generation | "Plugin updated! Base templates may have improved." → recommend regenerate |
+| Project changed (new deps, new files) | Audit and patch/regenerate as needed |
+| `--regenerate` flag | Skip audit, regenerate all |
+| `--update` flag | Regenerate only from new plugin templates, keep project context |
+
+**If plugin updated since last generation:**
+```
+DevTools plugin updated since team was generated!
+  Generated with: v1.0.0 (commit abc1234, 2026-03-15)
+  Current plugin: v1.1.0 (commit def5678, 2026-03-20)
+
+  Changes in plugin:
+  - Updated tester templates with MCP integration
+  - Added Gemini support for frontend developer
+  - Fixed dev-runner log file handling
+
+  Recommend: Regenerate agents to get latest improvements.
+  [U] Update agents (regenerate from new templates + keep project context)
+  [A] Audit only (check project drift, don't update templates)
+  [R] Full regenerate from scratch
+  [K] Keep current, no changes
+```
+
+**If agents exist, plugin unchanged** (re-run / audit mode):
 1. Read `.claude/team-config.json` for previous state
 2. Scan current project state (manifests, file patterns, dependencies)
 3. Score each existing agent (0-100%) against current project:
@@ -34,6 +105,7 @@ Check if `.claude/agents/` and `.claude/team-config.json` exist.
 7. Apply selected changes and update team-config.json
 
 If `$ARGUMENTS` contains `--regenerate`, skip audit and regenerate all.
+If `$ARGUMENTS` contains `--update`, regenerate from latest plugin templates while preserving project context.
 
 **If no agents exist** (first run):
 Continue to Step 2.
@@ -384,10 +456,14 @@ Each tester agent is responsible for updating the project's test scripts (packag
 Write `.claude/team-config.json` with:
 - `project_name` — from git or directory
 - `generated_at` — current timestamp
+- **`plugin_version`** — devtools plugin version (e.g., "1.0.0")
+- **`plugin_commit`** — git commit hash of the plugin when agents were generated
+- **`plugin_path`** — path to devtools plugin installation
 - `detected_services` — list with paths, profiles, scores, dependencies, **discovered commands**
 - `agents` — list with name, file path, base template, service assignment, health score
 - `phase_config` — from composition profile
 - `project_snapshot` — file count, dependency hash, last commit
+- `ai_tools` — detected AI tools (Gemini, etc.) and availability
 - `commands` — all discovered commands per service (start, test, build, health check, port)
 - `log_dir` — path pattern for service logs: `.claude/logs/<timestamp>/`
 
