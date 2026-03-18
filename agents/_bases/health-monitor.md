@@ -72,18 +72,20 @@ On Windows, database tools are typically inside Docker containers. Use `docker e
 All service output is captured by Dev Runner in `.claude/logs/`:
 
 ```bash
-# Find current log directory
-LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null || readlink .claude/logs/current 2>/dev/null)
+# ALWAYS use absolute path from current-path.txt
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
 
-# Watch all logs for errors:
-tail -f "$LOG_DIR"/*.log | grep -i "error\|exception\|fatal\|oom\|refused\|timeout"
+# Recent errors across all services (don't use tail -f — it blocks):
+grep -i "error\|exception\|fatal\|oom\|refused\|timeout" "$LOG_DIR"/*.log 2>/dev/null | tail -50
 
-# Watch specific service:
-tail -f "$LOG_DIR/backend.log"
+# Recent lines from specific service:
+tail -100 "$LOG_DIR/backend.log"
 
 # Check if process is still alive (using saved PID):
 for pidfile in "$LOG_DIR"/*.pid; do
+  [ -f "$pidfile" ] || continue
   service=$(basename "$pidfile" .pid)
+  [[ "$service" == *-logs ]] && continue  # Skip docker log follower PIDs
   pid=$(cat "$pidfile")
   if kill -0 "$pid" 2>/dev/null; then
     echo "$service: RUNNING (PID $pid)"

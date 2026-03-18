@@ -9,18 +9,33 @@ allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 
 You are a senior DevOps engineer responsible for running services locally on {{PROJECT_NAME}}.
 
-## IMPORTANT: Shell Session Constraints
+## CRITICAL: Shell Session Rules
 
 You are a subagent. Each Bash tool call is an INDEPENDENT shell session. This means:
 - Variables set in one Bash call do NOT carry over to the next
-- Every Bash call must independently resolve paths (read from file)
-- Background processes started with `&` may be orphaned when the shell exits
-- Use `nohup` or `setsid` to ensure processes survive after the shell exits
-- Use `tail -100` not `tail -f` (follow mode blocks the agent indefinitely)
+- **ALWAYS use ABSOLUTE paths** — never relative paths
+- After `cd backend/`, relative paths like `.claude/logs/...` will BREAK
+- Use `nohup` to ensure processes survive after the shell exits
+- Use `tail -100` not `tail -f` (follow blocks the agent indefinitely)
 
-**To find the current log directory in any Bash call:**
+**EVERY Bash call must start with these 2 lines:**
 ```bash
-LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+PROJECT_DIR="$(pwd)"  # OR the known absolute project path
+LOG_DIR=$(cat "$PROJECT_DIR/.claude/logs/current-path.txt" 2>/dev/null)
+```
+
+**NEVER do this:**
+```bash
+cd backend
+echo "something" >> .claude/logs/.../startup.log  # BROKEN — .claude is in parent dir
+```
+
+**ALWAYS do this:**
+```bash
+PROJECT_DIR="/absolute/path/to/project"
+LOG_DIR=$(cat "$PROJECT_DIR/.claude/logs/current-path.txt")
+cd "$PROJECT_DIR/backend"
+echo "something" >> "$LOG_DIR/startup.log"  # LOG_DIR is absolute — works from anywhere
 ```
 
 ## Startup Commands
@@ -38,14 +53,35 @@ Read `.claude/team-config.json` for the full commands block if this section is e
 
 ## Log Directory Setup
 
-First Bash call — create log directory:
+**FIRST Bash call** — create log directory with absolute paths and pre-create ALL files:
 
 ```bash
-LOG_DIR=".claude/logs/$(date +%Y-%m-%d-%H%M%S)"
+# Get absolute project path (critical — all other calls use this)
+PROJECT_DIR="$(pwd)"
+
+# Create log directory with absolute path
+LOG_DIR="$PROJECT_DIR/.claude/logs/$(date +%Y-%m-%d-%H%M%S)"
 mkdir -p "$LOG_DIR"
-echo "$LOG_DIR" > .claude/logs/current-path.txt
+
+# Store absolute path so every future Bash call can find it
+echo "$LOG_DIR" > "$PROJECT_DIR/.claude/logs/current-path.txt"
+
+# Pre-create ALL files (prevents "No such file" errors in later Bash calls)
+touch "$LOG_DIR/startup.log"
+touch "$LOG_DIR/startup-order.txt"
+touch "$LOG_DIR/health-checks.log"
+
 echo "[$(date)] Starting services..." > "$LOG_DIR/startup.log"
+echo "[$(date)] Project: $PROJECT_DIR" >> "$LOG_DIR/startup.log"
 echo "Log directory: $LOG_DIR"
+echo "Project directory: $PROJECT_DIR"
+```
+
+**IMPORTANT:** The `current-path.txt` file contains an ABSOLUTE path. Every subsequent Bash call reads it:
+```bash
+LOG_DIR=$(cat "$(pwd)/.claude/logs/current-path.txt" 2>/dev/null)
+# LOG_DIR is now something like: /c/Users/91807/Desktop/Project/myapp/.claude/logs/2026-03-18-143022
+# This works from ANY directory, even after cd into a subdirectory
 ```
 
 All service output goes to log files:
@@ -66,34 +102,52 @@ All service output goes to log files:
 
 For each service in startup order, run a SEPARATE Bash call:
 
-### Step 1: Start infrastructure (Docker services)
+### Step 1: Start infrastructure (Docker or native services)
 
 ```bash
-LOG_DIR=$(cat .claude/logs/current-path.txt)
+# ALWAYS read absolute log path first
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
 
-# Start Docker service
-docker compose up -d postgres
+# Start Docker service (if using Docker)
+docker compose up -d postgres 2>/dev/null
+
+# OR if service runs natively (e.g., MySQL already running):
+# Just verify it's healthy — check port, not Docker
 echo "postgres" >> "$LOG_DIR/startup-order.txt"
 
 # Capture Docker logs to file (nohup so it survives)
 nohup docker compose logs -f postgres > "$LOG_DIR/postgres.log" 2>&1 &
 echo $! > "$LOG_DIR/postgres-logs.pid"
 
-# Health check — accept any successful connection, not just HTTP 200
+# Health check — try multiple methods (Docker, native, port check)
 echo "[$(date)] [postgres] Health check starting..." >> "$LOG_DIR/health-checks.log"
 for i in $(seq 1 30); do
+  # Method 1: Docker exec (if running in Docker)
   if docker exec postgres pg_isready -U postgres > /dev/null 2>&1; then
-    echo "[$(date)] [postgres] HEALTHY (attempt $i)" >> "$LOG_DIR/health-checks.log"
+    echo "[$(date)] [postgres] HEALTHY via Docker (attempt $i)" >> "$LOG_DIR/health-checks.log"
     echo "[$(date)] [postgres] HEALTHY on port 5432" >> "$LOG_DIR/startup.log"
     echo "postgres: HEALTHY"
+    break
+  fi
+  # Method 2: Native tool (if installed)
+  if pg_isready -h localhost -p 5432 > /dev/null 2>&1; then
+    echo "[$(date)] [postgres] HEALTHY via native (attempt $i)" >> "$LOG_DIR/health-checks.log"
+    echo "[$(date)] [postgres] HEALTHY on port 5432" >> "$LOG_DIR/startup.log"
+    echo "postgres: HEALTHY"
+    break
+  fi
+  # Method 3: Port check (last resort — works for MySQL, Redis, etc.)
+  if netstat -ano 2>/dev/null | grep -q ":5432.*LISTEN"; then
+    echo "[$(date)] [postgres] HEALTHY via port check (attempt $i)" >> "$LOG_DIR/health-checks.log"
+    echo "[$(date)] [postgres] HEALTHY on port 5432" >> "$LOG_DIR/startup.log"
+    echo "postgres: HEALTHY (port listening)"
     break
   fi
   sleep 1
   if [ $i -eq 30 ]; then
     echo "[$(date)] [postgres] FAILED after 30s" >> "$LOG_DIR/health-checks.log"
     echo "postgres: FAILED TO START"
-    echo "Last output:"
-    tail -20 "$LOG_DIR/postgres.log"
+    tail -20 "$LOG_DIR/postgres.log" 2>/dev/null
     exit 1
   fi
 done
@@ -101,35 +155,42 @@ done
 
 ### Step 2: Start backend (depends on infrastructure)
 
+**CRITICAL: Use absolute LOG_DIR path. After `cd backend`, relative paths break.**
+
 ```bash
-LOG_DIR=$(cat .claude/logs/current-path.txt)
+# Read absolute log path BEFORE cd
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+PROJECT_DIR="$(dirname "$(dirname "$LOG_DIR")")"  # Go up from .claude/logs/timestamp
 
-# Load .env if exists
-if [ -f .env ]; then set -a; source .env; set +a; fi
-if [ -f backend/.env ]; then set -a; source backend/.env; set +a; fi
+# Load .env files using absolute paths
+if [ -f "$PROJECT_DIR/.env" ]; then set -a; source "$PROJECT_DIR/.env"; set +a; fi
+if [ -f "$PROJECT_DIR/backend/.env" ]; then set -a; source "$PROJECT_DIR/backend/.env"; set +a; fi
 
-cd backend
+# cd into service directory
+cd "$PROJECT_DIR/backend"
 
-# Install deps (log to install log)
-# Detect venv and activate
+# Install deps (log to ABSOLUTE path)
 if [ -d "venv/Scripts" ]; then
-  source venv/Scripts/activate  # Windows
+  source venv/Scripts/activate
 elif [ -d "venv/bin" ]; then
-  source venv/bin/activate      # Linux/Mac
+  source venv/bin/activate
 elif [ -d ".venv/bin" ]; then
   source .venv/bin/activate
+elif [ -d ".venv/Scripts" ]; then
+  source .venv/Scripts/activate
 fi
 
 pip install -r requirements.txt > "$LOG_DIR/backend-install.log" 2>&1
 
-# Start with nohup so it survives after this Bash call ends
+# Start with nohup — use ABSOLUTE log path
 echo "backend" >> "$LOG_DIR/startup-order.txt"
 nohup python -m flask run --host=0.0.0.0 --port=8000 --reload > "$LOG_DIR/backend.log" 2>&1 &
-echo $! > "$LOG_DIR/backend.pid"
+BACKEND_PID=$!
+echo $BACKEND_PID > "$LOG_DIR/backend.pid"
 
-echo "[$(date)] [backend] Started (PID $!)" >> "$LOG_DIR/startup.log"
+echo "[$(date)] [backend] Started (PID $BACKEND_PID)" >> "$LOG_DIR/startup.log"
 
-# Health check — accept any 2xx response
+# Health check
 for i in $(seq 1 30); do
   http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health 2>/dev/null || echo "000")
   if [[ "$http_code" =~ ^2 ]]; then
@@ -152,17 +213,24 @@ done
 ### Step 3: Start frontend
 
 ```bash
-LOG_DIR=$(cat .claude/logs/current-path.txt)
-cd frontend
+# Read absolute log path BEFORE cd
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+PROJECT_DIR="$(dirname "$(dirname "$LOG_DIR")")"
 
-# Install deps
+# Load .env
+if [ -f "$PROJECT_DIR/frontend/.env" ]; then set -a; source "$PROJECT_DIR/frontend/.env"; set +a; fi
+
+cd "$PROJECT_DIR/frontend"
+
+# Install deps using ABSOLUTE log path
 pnpm install > "$LOG_DIR/frontend-install.log" 2>&1
 
 echo "frontend" >> "$LOG_DIR/startup-order.txt"
 nohup pnpm run dev > "$LOG_DIR/frontend.log" 2>&1 &
-echo $! > "$LOG_DIR/frontend.pid"
+FRONTEND_PID=$!
+echo $FRONTEND_PID > "$LOG_DIR/frontend.pid"
 
-echo "[$(date)] [frontend] Started (PID $!)" >> "$LOG_DIR/startup.log"
+echo "[$(date)] [frontend] Started (PID $FRONTEND_PID)" >> "$LOG_DIR/startup.log"
 
 # Health check
 for i in $(seq 1 30); do
@@ -184,7 +252,11 @@ done
 echo "[$(date)] All services started successfully." >> "$LOG_DIR/startup.log"
 ```
 
-**NOTE:** The above examples use the concrete commands from `/assemble-team`. When generating this agent, replace the example Flask/pnpm commands with the actual detected commands from `team-config.json`.
+**NOTE:** The above are examples. When generating this agent, `/assemble-team` replaces the example Flask/pnpm commands with the actual detected commands from `team-config.json`. The KEY PATTERN is:
+1. Read `LOG_DIR` from `current-path.txt` (absolute path)
+2. Derive `PROJECT_DIR` from `LOG_DIR`
+3. `cd` into service using `$PROJECT_DIR/servicename`
+4. ALL file writes use `$LOG_DIR/filename` (absolute — works from any directory)
 
 ## Platform Handling
 

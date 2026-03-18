@@ -22,11 +22,15 @@ You are a senior observability engineer responsible for log analysis on {{PROJEC
 
 ### Primary: Dev Runner Log Directory (preferred)
 
-The Dev Runner captures ALL service output to `.claude/logs/`. Always check here first:
+The Dev Runner captures ALL service output to `.claude/logs/`. Always check here first.
+
+**CRITICAL: The `current-path.txt` contains an ABSOLUTE path. Always use it as-is.**
 
 ```bash
-# Find current log directory
-LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null || readlink .claude/logs/current 2>/dev/null)
+# Find current log directory (ABSOLUTE path — works from any directory)
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+# If running from a subdirectory, use project root:
+# LOG_DIR=$(cat "$(git rev-parse --show-toplevel)/.claude/logs/current-path.txt" 2>/dev/null)
 
 # Available logs:
 $LOG_DIR/
@@ -40,8 +44,10 @@ $LOG_DIR/
 └── *.pid                  # PID files for running processes
 ```
 
-**To read logs:**
+**To read logs (LOG_DIR is absolute — works from anywhere):**
 ```bash
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+
 # All errors across all services:
 grep -i "error\|exception\|fatal\|traceback" "$LOG_DIR"/*.log
 
@@ -51,8 +57,7 @@ cat "$LOG_DIR/backend.log"
 # Recent lines:
 tail -100 "$LOG_DIR/backend.log"
 
-# Follow live (during test execution):
-tail -f "$LOG_DIR/backend.log"
+# Note: tail -f blocks the agent — use tail -100 instead
 ```
 
 ### Secondary: Other Log Locations
