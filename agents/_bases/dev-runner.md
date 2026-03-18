@@ -15,8 +15,10 @@ You are a subagent. Each Bash tool call is an INDEPENDENT shell session. This me
 - Variables set in one Bash call do NOT carry over to the next
 - **ALWAYS use ABSOLUTE paths** — never relative paths
 - After `cd backend/`, relative paths like `.claude/logs/...` will BREAK
-- Use `nohup` to ensure processes survive after the shell exits
+- Use `nohup` (works in Git Bash on Windows AND Linux) to keep processes alive after shell exits
+- On Windows cmd.exe (rare): use `start /B` instead of `nohup`
 - Use `tail -100` not `tail -f` (follow blocks the agent indefinitely)
+- Capture BOTH terminal output (stdout/stderr) AND application log files in one place
 
 **EVERY Bash call must start with these 2 lines:**
 ```bash
@@ -257,6 +259,82 @@ echo "[$(date)] All services started successfully." >> "$LOG_DIR/startup.log"
 2. Derive `PROJECT_DIR` from `LOG_DIR`
 3. `cd` into service using `$PROJECT_DIR/servicename`
 4. ALL file writes use `$LOG_DIR/filename` (absolute — works from any directory)
+
+## Cross-Platform Process Detach
+
+| Method | Linux/Mac | Windows (Git Bash) | Windows (cmd.exe) |
+|--------|-----------|-------------------|-------------------|
+| Background + survive | `nohup cmd > log 2>&1 &` | `nohup cmd > log 2>&1 &` (works!) | `start /B cmd > log 2>&1` |
+| Get PID | `echo $!` | `echo $!` | Not directly available |
+| Check alive | `kill -0 $pid` | `kill -0 $pid` | `tasklist /FI "PID eq $pid"` |
+
+**Claude Code on Windows uses Git Bash** — so `nohup` works. Only use `start /B` if running outside Claude Code.
+
+## Application Log Capture
+
+Services write logs in two ways — capture BOTH:
+
+### 1. Terminal output (stdout/stderr) → already captured
+```bash
+nohup command > "$LOG_DIR/backend.log" 2>&1 &
+# This captures everything the service prints to terminal
+```
+
+### 2. Application log files → symlink or copy to log dir
+Many frameworks write to separate log files. After starting each service, check for app log files and link them:
+
+```bash
+LOG_DIR=$(cat .claude/logs/current-path.txt 2>/dev/null)
+
+# Check for common application log locations after service starts
+sleep 2  # Wait for service to create log files
+
+# Node.js (Winston, Pino, Morgan)
+for logfile in "$PROJECT_DIR/backend/logs/"*.log "$PROJECT_DIR/backend/"*.log; do
+  if [ -f "$logfile" ]; then
+    name=$(basename "$logfile")
+    # Copy app log into our log directory (symlink breaks on Windows)
+    cp "$logfile" "$LOG_DIR/backend-app-$name" 2>/dev/null
+    echo "[$(date)] [backend] Found app log: $logfile → copied to $LOG_DIR/backend-app-$name" >> "$LOG_DIR/startup.log"
+  fi
+done
+
+# Python (Django, Flask logging)
+for logfile in "$PROJECT_DIR/backend/logs/"*.log "$PROJECT_DIR/backend/"debug.log "$PROJECT_DIR/backend/"error.log; do
+  if [ -f "$logfile" ]; then
+    name=$(basename "$logfile")
+    cp "$logfile" "$LOG_DIR/backend-app-$name" 2>/dev/null
+  fi
+done
+
+# Frontend (Next.js, Vite)
+for logfile in "$PROJECT_DIR/frontend/.next/server/"*.log "$PROJECT_DIR/frontend/"*.log; do
+  if [ -f "$logfile" ]; then
+    name=$(basename "$logfile")
+    cp "$logfile" "$LOG_DIR/frontend-app-$name" 2>/dev/null
+  fi
+done
+```
+
+### 3. Docker logs → already captured
+```bash
+nohup docker compose logs -f servicename > "$LOG_DIR/servicename.log" 2>&1 &
+```
+
+### Result: All logs in one place
+```
+$LOG_DIR/
+├── startup.log              # Dev runner sequence
+├── backend.log              # Backend terminal output (stdout+stderr)
+├── backend-app-error.log    # Backend application error log (from Winston/logging)
+├── backend-app-access.log   # Backend application access log (from Morgan/logging)
+├── frontend.log             # Frontend terminal output
+├── frontend-app-next.log    # Frontend app log (if Next.js)
+├── postgres.log             # Docker container output
+└── health-checks.log        # Health check results
+```
+
+The tester and log-tracker agents can now read ALL logs from one directory — both terminal output and application-specific logs.
 
 ## Platform Handling
 
