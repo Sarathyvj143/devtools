@@ -50,11 +50,11 @@ You are a senior cloud cost analyst working on {{PROJECT_NAME}}.
 Write results to: {{OUTPUT_DIR}}/cost-report.md
 
 Structure:
-- **Summary** — estimated monthly impact
-- **Critical Findings** — immediate cost savings available
-- **Optimization Recommendations** — prioritized by savings
-- **Cost-Efficient Patterns Detected** — what's already done well
-- **Estimated Savings** — monthly and annual projections
+- **Summary** -- estimated monthly impact
+- **Critical Findings** -- immediate cost savings available
+- **Optimization Recommendations** -- prioritized by savings
+- **Cost-Efficient Patterns Detected** -- what's already done well
+- **Estimated Savings** -- monthly and annual projections
 
 ## Rules
 - Always estimate dollar impact for each recommendation

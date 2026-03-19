@@ -1,4 +1,4 @@
-# Multi-Agent Orchestration System — Design Spec
+# Multi-Agent Orchestration System -- Design Spec
 
 **Date:** 2026-03-15
 **Status:** Approved
@@ -16,12 +16,12 @@ A multi-agent orchestration system for the devtools plugin that assembles projec
 - Generate project-specific agents from base templates + service profiles
 - Orchestrate agents in phased workflows with review gates and cross-verification
 - Agents usable both orchestrated (via `/orchestrate`) and standalone (via `/agent`)
-- Integrate with existing superpowers flow (brainstorming → writing-plans → executing-plans → finishing)
-- Audit existing agents with 80% quality threshold — regenerate stale agents
+- Integrate with existing superpowers flow (brainstorming -> writing-plans -> executing-plans -> finishing)
+- Audit existing agents with 80% quality threshold -- regenerate stale agents
 
 ### Non-Goals
-- Not a replacement for superpowers' built-in skills — integrates with them
-- Not a CI/CD system — agents work within Claude Code sessions
+- Not a replacement for superpowers' built-in skills -- integrates with them
+- Not a CI/CD system -- agents work within Claude Code sessions
 - No persistent agent state between sessions beyond generated files
 
 ---
@@ -32,7 +32,7 @@ A multi-agent orchestration system for the devtools plugin that assembles projec
 
 Claude Code uses a **flat controller-to-subagent** model:
 - The **controller** is the top-level session (the main Claude Code instance)
-- **Subagents** are dispatched by the controller — they cannot dispatch further subagents
+- **Subagents** are dispatched by the controller -- they cannot dispatch further subagents
 - Subagents have isolated context and return results to the controller
 
 **The "Manager" is NOT an agent.** It is a **skill** (`skills/orchestrator/SKILL.md`) that instructs the top-level controller how to run phases, dispatch agents, and make decisions. The orchestration logic lives in this skill, not in a dispatched subagent.
@@ -40,9 +40,9 @@ Claude Code uses a **flat controller-to-subagent** model:
 ### Parallel Write Safety
 
 Multiple write-agents editing the same repository will conflict. Parallel dispatch is only safe when:
-- **Read-only agents** (researcher, reviewer, security) — always safe to parallelize
-- **Write-agents with file-scope isolation** — each developer is scoped to a specific service directory (e.g., Developer A only touches `./frontend/`, Developer B only touches `./backend/`)
-- **Sequential fallback** — if agents share file scope, they run sequentially
+- **Read-only agents** (researcher, reviewer, security) -- always safe to parallelize
+- **Write-agents with file-scope isolation** -- each developer is scoped to a specific service directory (e.g., Developer A only touches `./frontend/`, Developer B only touches `./backend/`)
+- **Sequential fallback** -- if agents share file scope, they run sequentially
 
 ### Context Window Management
 
@@ -56,7 +56,7 @@ Each phase dispatches fresh subagents (resetting context). The controller mainta
 
 | # | Type | Name | Role | Phase | Tools |
 |---|------|------|------|-------|-------|
-| — | Skill | Orchestrator | Phase management, workflow decisions, agent dispatch | All | (controller-level) |
+| -- | Skill | Orchestrator | Phase management, workflow decisions, agent dispatch | All | (controller-level) |
 | 1 | Agent | Requirements Analyst | Gathers and clarifies requirements, writes specs | 1 | Read, Glob, Grep, Bash |
 | 2 | Agent | Researcher | Investigates tech, finds solutions, reads docs | 1 | Read, Glob, Grep, Bash, WebSearch, WebFetch |
 | 3 | Agent | Architect | System design, tech stack decisions, patterns | 2 | Read, Glob, Grep, Bash |
@@ -91,15 +91,15 @@ Each phase dispatches fresh subagents (resetting context). The controller mainta
 
 ```
 Single cloud detected (e.g., only AWS):
-  → Enhance DevOps agent with AWS-specific knowledge (no separate cloud agent)
-  → Always generate Cost Optimizer agent
+  -> Enhance DevOps agent with AWS-specific knowledge (no separate cloud agent)
+  -> Always generate Cost Optimizer agent
 
 Multiple clouds detected (e.g., AWS + GCP):
-  → Keep DevOps agent for CI/CD and general deployment
-  → Generate aws-cloud.md — scoped to AWS files/directories
-  → Generate gcp-cloud.md — scoped to GCP files/directories
-  → Generate Cost Optimizer — cross-cloud analysis
-  → If Terraform/Pulumi detected, generate infra agent too
+  -> Keep DevOps agent for CI/CD and general deployment
+  -> Generate aws-cloud.md -- scoped to AWS files/directories
+  -> Generate gcp-cloud.md -- scoped to GCP files/directories
+  -> Generate Cost Optimizer -- cross-cloud analysis
+  -> If Terraform/Pulumi detected, generate infra agent too
 ```
 
 **Note:** The Orchestrator is a skill, not an agent. It runs at the controller level and dispatches all other agents. Cloud agents are only generated when cloud providers are detected.
@@ -112,7 +112,7 @@ Multiple clouds detected (e.g., AWS + GCP):
 devtools/
 ├── agents/
 │   ├── _bases/                    # Base templates for 11 core agents + cloud agents
-│   │   # NOTE: No manager.md — orchestration is a skill, not an agent
+│   │   # NOTE: No manager.md -- orchestration is a skill, not an agent
 │   │   ├── requirements.md
 │   │   ├── researcher.md
 │   │   ├── architect.md
@@ -168,7 +168,7 @@ devtools/
 │   └── orchestrator/
 │       └── SKILL.md              # Phase management + workflow selection
 ├── commands/
-│   ├── assemble-team.md          # Detect → generate → audit
+│   ├── assemble-team.md          # Detect -> generate -> audit
 │   ├── orchestrate.md            # Run full phased workflow
 │   └── agent.md                  # Use agent(s) standalone
 ```
@@ -224,12 +224,12 @@ You are a senior developer working on {{PROJECT_NAME}}.
 {{CONVENTIONS}}
 
 ## Your Assigned Service
-{{SERVICE_NAME}} — {{SERVICE_PATH}}
+{{SERVICE_NAME}} -- {{SERVICE_PATH}}
 
 ## Your Task
 - Write clean, tested, production-ready code
 - Follow existing patterns in the codebase
-- Keep files focused — one responsibility per file
+- Keep files focused -- one responsibility per file
 
 ## Rules
 - Never modify files outside your assigned scope
@@ -241,12 +241,12 @@ Write results to: {{OUTPUT_DIR}}/developer-output.md
 ```
 
 Placeholder resolution:
-- `{{PROJECT_NAME}}` — from git remote or directory name
-- `{{TECH_STACK}}` — from detected profile context
-- `{{PROJECT_STRUCTURE}}` — generated file tree of relevant directories
-- `{{CONVENTIONS}}` — from profile + CLAUDE.md if exists
-- `{{SERVICE_NAME}}` / `{{SERVICE_PATH}}` — from composite detection
-- `{{OUTPUT_DIR}}` — `.claude/orchestrator/runs/<current-run>/`
+- `{{PROJECT_NAME}}` -- from git remote or directory name
+- `{{TECH_STACK}}` -- from detected profile context
+- `{{PROJECT_STRUCTURE}}` -- generated file tree of relevant directories
+- `{{CONVENTIONS}}` -- from profile + CLAUDE.md if exists
+- `{{SERVICE_NAME}}` / `{{SERVICE_PATH}}` -- from composite detection
+- `{{OUTPUT_DIR}}` -- `.claude/orchestrator/runs/<current-run>/`
 
 ---
 
@@ -313,7 +313,7 @@ Placeholder resolution:
 
 ## 7. `/assemble-team` Command
 
-### First Run — Detection and Generation
+### First Run -- Detection and Generation
 
 ```
 /assemble-team
@@ -361,7 +361,7 @@ Placeholder resolution:
 7. Confirm to user
 ```
 
-### Re-Run — Audit with Quality Scoring
+### Re-Run -- Audit with Quality Scoring
 
 ```
 /assemble-team (agents already exist)
@@ -371,11 +371,11 @@ Placeholder resolution:
 2. Score each existing agent (0-100%):
 
    Scoring criteria:
-   ├── Framework match (25%)     — agent references correct framework/version?
-   ├── File coverage (25%)       — agent knows about files it should work with?
-   ├── Dependency awareness (20%) — agent knows current deps?
-   ├── Convention alignment (15%) — agent follows project's actual patterns?
-   └── Completeness (15%)        — agent has all required sections?
+   ├── Framework match (25%)     -- agent references correct framework/version?
+   ├── File coverage (25%)       -- agent knows about files it should work with?
+   ├── Dependency awareness (20%) -- agent knows current deps?
+   ├── Convention alignment (15%) -- agent follows project's actual patterns?
+   └── Completeness (15%)        -- agent has all required sections?
      ↓
 3. Compare against team-config.json for drift:
    - New services added?
@@ -386,13 +386,13 @@ Placeholder resolution:
 4. Report with scores:
 
    Agent Health Report:
-   ✓ api-reviewer.md                — 95% (healthy)
-   ⚠ react-frontend-developer.md  — 72% (BELOW 80% — REGENERATE)
+   OK api-reviewer.md                -- 95% (healthy)
+   ⚠ react-frontend-developer.md  -- 72% (BELOW 80% -- REGENERATE)
       Missing: React 19 patterns, new component structure
-   ✓ node-backend-developer.md     — 88% (healthy)
+   OK node-backend-developer.md     -- 88% (healthy)
 
    New services detected:
-   + Redis cache → needs cache-developer agent
+   + Redis cache -> needs cache-developer agent
 
    Actions:
    [A] Apply all (regenerate stale + add new)
@@ -410,7 +410,7 @@ Placeholder resolution:
 
 ---
 
-## 8. `/orchestrate` Command — Phased Workflow
+## 8. `/orchestrate` Command -- Phased Workflow
 
 ### Entry
 
@@ -426,8 +426,8 @@ The orchestrator skill selects the pattern based on task complexity:
 
 | Complexity | Detection | Pattern |
 |-----------|-----------|---------|
-| Simple | Single file change, bug fix, small tweak | Developer → Tester → Reviewer |
-| Medium | Single service, moderate scope | Requirements → Developer + Tester (parallel) → Reviewer |
+| Simple | Single file change, bug fix, small tweak | Developer -> Tester -> Reviewer |
+| Medium | Single service, moderate scope | Requirements -> Developer + Tester (parallel) -> Reviewer |
 | Complex | Multi-service or large scope | Full 6-phase workflow |
 | Plan exists | `docs/superpowers/plans/*` matches task | Skip to Phase 4 |
 | Spec exists | `docs/superpowers/specs/*` matches task | Skip to Phase 3 |
@@ -436,45 +436,45 @@ The orchestrator skill selects the pattern based on task complexity:
 
 ```
 Phase 1: Discovery (parallel)
-├── Requirements Analyst → outputs: requirements.md
-└── Researcher → outputs: research-report.md
+├── Requirements Analyst -> outputs: requirements.md
+└── Researcher -> outputs: research-report.md
     ↓
   GATE: Controller reviews outputs, confirms scope
     ↓
 Phase 2: Design (parallel)
-├── Architect → outputs: architecture.md
-└── UX Designer → outputs: ux-spec.md (if UI work)
+├── Architect -> outputs: architecture.md
+└── UX Designer -> outputs: ux-spec.md (if UI work)
     ↓
   GATE: Cross-verification (see Section 8)
     ↓
 Phase 3: Planning
-└── Controller → invokes superpowers:writing-plans
-    → outputs: implementation plan
+└── Controller -> invokes superpowers:writing-plans
+    -> outputs: implementation plan
     ↓
   GATE: User approves plan
     ↓
 Phase 4: Implementation (file-scope isolated parallelism)
-├── Developer A → writes code (scoped to ./frontend/ only)
-├── Developer B → writes code (scoped to ./backend/ only)
+├── Developer A -> writes code (scoped to ./frontend/ only)
+├── Developer B -> writes code (scoped to ./backend/ only)
 │   NOTE: Multiple developers run in parallel ONLY if scoped to
 │   different service directories. Same-scope devs run sequentially.
-├── Tester → runs AFTER developers complete (sequential)
-└── DevOps → infra changes (parallel, scoped to infra files only)
+├── Tester -> runs AFTER developers complete (sequential)
+└── DevOps -> infra changes (parallel, scoped to infra files only)
     ↓
   GATE: Cross-verification (see Section 8)
     ↓
 Phase 5: Verification (parallel)
-├── Reviewer → code review
-├── Security Analyst → security scan
+├── Reviewer -> code review
+├── Security Analyst -> security scan
 └── Cross-verification pairs
     ↓
   GATE: All verifiers pass (≥80% score)
-    If fails → routes back to Phase 4 with feedback
+    If fails -> routes back to Phase 4 with feedback
     Max 3 retry loops, then surfaces to user
     ↓
 Phase 6: Completion
-├── Documentation Writer → generates/updates docs
-└── Controller → final report + invokes superpowers:finishing-a-development-branch
+├── Documentation Writer -> generates/updates docs
+└── Controller -> final report + invokes superpowers:finishing-a-development-branch
 ```
 
 ### Existing Work Detection
@@ -484,19 +484,19 @@ Before starting, the manager scans for existing work:
 ```
 Scan order:
 1. Previous run? (.claude/orchestrator/runs/*<task>*)
-   → Resume from last completed phase
+   -> Resume from last completed phase
 
 2. Spec exists? (docs/superpowers/specs/*<task>*)
-   → Skip Phase 1-2, start at Phase 3
+   -> Skip Phase 1-2, start at Phase 3
 
 3. Plan exists? (docs/superpowers/plans/*<task>*)
-   → Skip Phase 1-3, start at Phase 4
+   -> Skip Phase 1-3, start at Phase 4
 
 4. Partial implementation? (git log, changed files matching task)
-   → Resume Phase 4 from detected progress
+   -> Resume Phase 4 from detected progress
 
 5. Nothing found
-   → Start from Phase 1
+   -> Start from Phase 1
 ```
 
 ### Run Log
@@ -506,23 +506,23 @@ Each run produces `.claude/orchestrator/runs/<run-name>/run-log.md`:
 ```markdown
 # Run: Add user authentication with OAuth2
 **Started:** 2026-03-15 14:30
-**Status:** In Progress — Phase 4
+**Status:** In Progress -- Phase 4
 
-## Phase 1: Discovery ✓
+## Phase 1: Discovery OK
 - Requirements Analyst: DONE (requirements.md)
 - Researcher: DONE (research-report.md)
 - Gate: PASSED (manager approved scope)
 
-## Phase 2: Design ✓
+## Phase 2: Design OK
 - Architect: DONE (architecture.md)
 - UX Designer: SKIPPED (no UI work)
 - Gate: PASSED (cross-verify score: 92%)
 
-## Phase 3: Planning ✓
+## Phase 3: Planning OK
 - Plan: docs/superpowers/plans/2026-03-15-auth-oauth2.md
 - Gate: PASSED (user approved)
 
-## Phase 4: Implementation ← CURRENT
+## Phase 4: Implementation <- CURRENT
 - node-backend-developer: IN PROGRESS
 - fullstack-tester: IN PROGRESS (parallel)
 - devops: NOT STARTED
@@ -532,7 +532,7 @@ Each run produces `.claude/orchestrator/runs/<run-name>/run-log.md`:
 
 ## 9. Cross-Verification Matrix
 
-### Phase 2 → Phase 3 Gate (1 verifier dispatch)
+### Phase 2 -> Phase 3 Gate (1 verifier dispatch)
 
 A single **Architect-Reviewer** agent verifies design coherence:
 
@@ -542,9 +542,9 @@ A single **Architect-Reviewer** agent verifies design coherence:
 | Technical feasibility | UX spec is feasible with chosen architecture? |
 | Security posture | Architecture has auth/authz? No obvious security gaps? |
 
-This is 1 subagent dispatch, not 4 separate ones — keeps context efficient.
+This is 1 subagent dispatch, not 4 separate ones -- keeps context efficient.
 
-### Phase 4 → Phase 5 Gate (1 verifier dispatch)
+### Phase 4 -> Phase 5 Gate (1 verifier dispatch)
 
 A single **Integration-Verifier** agent checks cross-service coherence:
 
@@ -554,7 +554,7 @@ A single **Integration-Verifier** agent checks cross-service coherence:
 | Test coverage | All code paths have tests? Tests pass? |
 | Deployability | Env vars set? No hardcoded secrets? Config complete? |
 
-### Phase 5 Verification (2 verifier dispatches — parallel, read-only)
+### Phase 5 Verification (2 verifier dispatches -- parallel, read-only)
 
 Following the proven superpowers 2-reviewer pattern:
 
@@ -563,7 +563,7 @@ Following the proven superpowers 2-reviewer pattern:
 | **Reviewer** (code quality) | Code quality, patterns, DRY, readability, implementation matches design |
 | **Security Analyst** (security) | OWASP top 10, injection, auth bypass, data exposure, dependency vulnerabilities |
 
-Both are read-only agents — safe to run in parallel.
+Both are read-only agents -- safe to run in parallel.
 
 ### Developer Feedback Loop
 
@@ -584,15 +584,15 @@ Each verifier gives:
 
 Gate score = average of all verifier scores
 
-≥ 80%  → PROCEED to next phase
-50-79% → PROCEED WITH WARNINGS (logged in run-log.md)
-< 50%  → BLOCK — route back to previous phase with specific feedback
+≥ 80%  -> PROCEED to next phase
+50-79% -> PROCEED WITH WARNINGS (logged in run-log.md)
+< 50%  -> BLOCK -- route back to previous phase with specific feedback
          Max 3 retry loops, then surface to user for decision
 ```
 
 ---
 
-## 10. `/agent` Command — Standalone Usage
+## 10. `/agent` Command -- Standalone Usage
 
 Use individual agents without full orchestration:
 
@@ -628,9 +628,9 @@ Use individual agents without full orchestration:
 /agent --list
 # Output:
 #   Project agents (.claude/agents/):
-#     react-frontend-developer  — React frontend specialist
-#     node-backend-developer    — Node.js backend specialist
-#     fullstack-tester          — Cross-service test writer
+#     react-frontend-developer  -- React frontend specialist
+#     node-backend-developer    -- Node.js backend specialist
+#     fullstack-tester          -- Cross-service test writer
 #
 #   Base agents (available with --generic flag):
 #     requirements, researcher, architect, developer, tester, ...
@@ -644,7 +644,7 @@ The orchestrator integrates with existing superpowers skills at specific phase b
 
 | Phase | Superpowers Skill | How |
 |-------|-------------------|-----|
-| Phase 2 → 3 | `superpowers:brainstorming` | If no spec exists, manager can invoke brainstorming before planning |
+| Phase 2 -> 3 | `superpowers:brainstorming` | If no spec exists, manager can invoke brainstorming before planning |
 | Phase 3 | `superpowers:writing-plans` | Manager invokes to create implementation plan |
 | Phase 4 | `superpowers:executing-plans` | Each developer follows the plan steps |
 | Phase 4 | `superpowers:test-driven-development` | Tester follows TDD workflow |
@@ -710,44 +710,44 @@ Written to `.claude/team-config.json` in the target project:
 
 ## 13. Communication Between Agents
 
-### Large Outputs — Files
+### Large Outputs -- Files
 
 Each agent writes structured outputs to the run directory:
 
 ```
 .claude/orchestrator/runs/<run-name>/
-├── requirements.md          ← Requirements Analyst
-├── research-report.md       ← Researcher
-├── architecture.md          ← Architect
-├── ux-spec.md              ← UX Designer
-├── verification-report.md   ← Reviewer
-├── security-report.md       ← Security Analyst
-├── test-report.md          ← Tester
-├── devops-report.md        ← DevOps
-├── docs-output.md          ← Documentation Writer
-└── run-log.md              ← Manager (phase tracking)
+├── requirements.md          <- Requirements Analyst
+├── research-report.md       <- Researcher
+├── architecture.md          <- Architect
+├── ux-spec.md              <- UX Designer
+├── verification-report.md   <- Reviewer
+├── security-report.md       <- Security Analyst
+├── test-report.md          <- Tester
+├── devops-report.md        <- DevOps
+├── docs-output.md          <- Documentation Writer
+└── run-log.md              <- Manager (phase tracking)
 ```
 
-### Small Handoffs — Context Injection
+### Small Handoffs -- Context Injection
 
 The controller passes summaries between phases:
 
 ```
-Phase 1 → Phase 2:
+Phase 1 -> Phase 2:
   Controller reads requirements.md + research-report.md
   Generates 3-5 sentence summary
   Injects into Architect + UX Designer prompts
 
-Phase 2 → Phase 3:
+Phase 2 -> Phase 3:
   Controller reads architecture.md + cross-verify results
   Passes key decisions to planning phase
 
-Phase 4 → Phase 5:
+Phase 4 -> Phase 5:
   Controller summarizes what was implemented + test results
   Injects into Reviewer + Security Analyst prompts
 ```
 
-This keeps context windows efficient — full reports stay in files, only summaries travel between agents.
+This keeps context windows efficient -- full reports stay in files, only summaries travel between agents.
 
 ---
 
@@ -769,7 +769,7 @@ The audit is performed by the **controller** (top-level session) using the orche
 4. **Score** is calculated as a weighted percentage
 5. **Result** written to `team-config.json` per agent
 
-This is a heuristic check, not a test suite. The controller reads files and makes judgments — no specialized tooling needed.
+This is a heuristic check, not a test suite. The controller reads files and makes judgments -- no specialized tooling needed.
 
 ---
 
@@ -779,20 +779,20 @@ This is a heuristic check, not a test suite. The controller reads files and make
 
 1. Controller reads `.claude/orchestrator/runs/` to find the most recent run
 2. Reads `run-log.md` from that run directory
-3. Parses the phase completion markers (`✓` = done, `← CURRENT` = in progress)
+3. Parses the phase completion markers (`OK` = done, `<- CURRENT` = in progress)
 4. Reconstructs state:
-   - Completed phases → skip
-   - Current phase → read the phase's output files for context
+   - Completed phases -> skip
+   - Current phase -> read the phase's output files for context
    - Generate summary of completed work from output files
 5. Resume from the current phase with that summary as context
 
 ### If run-log is incomplete
 
 - If `run-log.md` is missing or corrupted, fall back to scanning output files:
-  - `requirements.md` exists → Phase 1 done
-  - `architecture.md` exists → Phase 2 done
-  - Plan file exists → Phase 3 done
-  - Git log shows implementation commits → Phase 4 partially done
+  - `requirements.md` exists -> Phase 1 done
+  - `architecture.md` exists -> Phase 2 done
+  - Plan file exists -> Phase 3 done
+  - Git log shows implementation commits -> Phase 4 partially done
 - Present findings to user: "Recovered state: Phases 1-3 complete, Phase 4 partial. Resume from Phase 4?"
 
 ---
@@ -822,7 +822,7 @@ Each cloud agent (AWS/GCP/Azure) covers:
 
 ### Cost Optimizer Agent
 
-The Cost Optimizer is a **cross-cutting agent** — it reads IaC templates and cloud configs across ALL detected clouds. Always generated when any cloud is detected.
+The Cost Optimizer is a **cross-cutting agent** -- it reads IaC templates and cloud configs across ALL detected clouds. Always generated when any cloud is detected.
 
 **What it analyzes:**
 
@@ -840,14 +840,14 @@ The Cost Optimizer is a **cross-cutting agent** — it reads IaC templates and c
 ```
 Phase 2 (Design):
   Cost Optimizer reviews architecture.md
-  → Flags expensive patterns before implementation
-  → Suggests cost-efficient alternatives
+  -> Flags expensive patterns before implementation
+  -> Suggests cost-efficient alternatives
 
 Phase 5 (Verification):
   Cost Optimizer reviews all IaC changes
-  → Estimates cost impact of changes
-  → Flags any new resources without cost justification
-  → Produces cost-report.md in run outputs
+  -> Estimates cost impact of changes
+  -> Flags any new resources without cost justification
+  -> Produces cost-report.md in run outputs
 ```
 
 **Output format** (`.claude/orchestrator/runs/<run>/cost-report.md`):
@@ -861,13 +861,13 @@ Estimated monthly impact: +$45/month
 ## Findings
 
 ### ⚠ Over-provisioned (3 items)
-- RDS instance: db.r5.xlarge → db.r5.large saves ~$120/month
-- Lambda memory: 1024MB → 256MB sufficient for this workload
-- ECS task: 2 vCPU → 1 vCPU based on utilization patterns
+- RDS instance: db.r5.xlarge -> db.r5.large saves ~$120/month
+- Lambda memory: 1024MB -> 256MB sufficient for this workload
+- ECS task: 2 vCPU -> 1 vCPU based on utilization patterns
 
-### ✓ Cost-efficient patterns detected
-- Using S3 Intelligent-Tiering for logs ✓
-- Spot instances for batch processing ✓
+### OK Cost-efficient patterns detected
+- Using S3 Intelligent-Tiering for logs OK
+- Spot instances for batch processing OK
 
 ### 💡 Recommendations
 - Add lifecycle policy to S3 bucket (expire after 90 days)
@@ -881,9 +881,9 @@ Added to Phase 5 verification matrix:
 | Verifier | Checks |
 |----------|--------|
 | Cloud Agent A ↔ Cloud Agent B | Cross-cloud networking consistent? Shared resources aligned? |
-| Security → Cloud Agents | IAM least-privilege? Encryption enabled? No public exposure? |
-| Cost Optimizer → Cloud Agents | Cost-efficient choices? No waste? Budget impact acceptable? |
-| Cloud Agent → DevOps | Infra changes deployable via existing CI/CD? |
+| Security -> Cloud Agents | IAM least-privilege? Encryption enabled? No public exposure? |
+| Cost Optimizer -> Cloud Agents | Cost-efficient choices? No waste? Budget impact acceptable? |
+| Cloud Agent -> DevOps | Infra changes deployable via existing CI/CD? |
 
 ---
 

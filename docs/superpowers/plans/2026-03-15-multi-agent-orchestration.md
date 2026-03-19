@@ -127,17 +127,17 @@ You are a senior requirements analyst working on {{PROJECT_NAME}}.
 Write results to: {{OUTPUT_DIR}}/requirements.md
 
 Structure:
-- **Summary** — 2-3 sentence overview
-- **Functional Requirements** — numbered list with priority
-- **Non-Functional Requirements** — numbered list
-- **Dependencies** — what this work depends on
-- **Open Questions** — anything needing clarification
-- **Out of Scope** — explicitly excluded items
+- **Summary** -- 2-3 sentence overview
+- **Functional Requirements** -- numbered list with priority
+- **Non-Functional Requirements** -- numbered list
+- **Dependencies** -- what this work depends on
+- **Open Questions** -- anything needing clarification
+- **Out of Scope** -- explicitly excluded items
 
 ## Rules
-- Be specific — "fast" is not a requirement, "responds in <200ms" is
+- Be specific -- "fast" is not a requirement, "responds in <200ms" is
 - Every requirement must be testable/verifiable
-- Do not assume requirements — flag unknowns as open questions
+- Do not assume requirements -- flag unknowns as open questions
 ```
 
 - [ ] **Step 3: Commit**
@@ -189,12 +189,12 @@ You are a senior technical researcher working on {{PROJECT_NAME}}.
 Write results to: {{OUTPUT_DIR}}/research-report.md
 
 Structure:
-- **Research Question** — what was investigated
-- **Findings** — key discoveries with sources
-- **Options Comparison** — table of alternatives with pros/cons
-- **Recommendation** — preferred approach with reasoning
-- **Risks & Concerns** — security, compatibility, maintenance issues
-- **References** — links to docs, articles, repos
+- **Research Question** -- what was investigated
+- **Findings** -- key discoveries with sources
+- **Options Comparison** -- table of alternatives with pros/cons
+- **Recommendation** -- preferred approach with reasoning
+- **Risks & Concerns** -- security, compatibility, maintenance issues
+- **References** -- links to docs, articles, repos
 
 ## Rules
 - Always cite sources for claims
@@ -259,19 +259,19 @@ You are a senior software architect working on {{PROJECT_NAME}}.
 Write results to: {{OUTPUT_DIR}}/architecture.md
 
 Structure:
-- **Overview** — high-level approach in 2-3 sentences
-- **Components** — each component with purpose, inputs, outputs
-- **Data Flow** — how data moves through the system
-- **Interfaces** — API contracts between components/services
-- **Tech Decisions** — specific libraries/tools chosen with reasoning
-- **Error Handling** — failure modes and recovery strategies
-- **Security Considerations** — auth, data protection, input validation
+- **Overview** -- high-level approach in 2-3 sentences
+- **Components** -- each component with purpose, inputs, outputs
+- **Data Flow** -- how data moves through the system
+- **Interfaces** -- API contracts between components/services
+- **Tech Decisions** -- specific libraries/tools chosen with reasoning
+- **Error Handling** -- failure modes and recovery strategies
+- **Security Considerations** -- auth, data protection, input validation
 
 ## Rules
-- Follow existing codebase patterns — don't introduce conflicting architectures
-- Design for isolation — each component should be testable independently
-- Prefer simplicity over cleverness — YAGNI applies to architecture too
-- Keep files focused — one responsibility per file, prefer smaller units
+- Follow existing codebase patterns -- don't introduce conflicting architectures
+- Design for isolation -- each component should be testable independently
+- Prefer simplicity over cleverness -- YAGNI applies to architecture too
+- Keep files focused -- one responsibility per file, prefer smaller units
 ```
 
 - [ ] **Step 2: Commit**
@@ -327,12 +327,12 @@ You are a senior UX designer working on {{PROJECT_NAME}}.
 Write results to: {{OUTPUT_DIR}}/ux-spec.md
 
 Structure:
-- **User Goals** — what users are trying to accomplish
-- **User Flow** — step-by-step interaction sequence
-- **Component Spec** — each UI component with props, states, interactions
-- **Responsive Behavior** — how layout adapts across breakpoints
-- **Accessibility** — ARIA labels, keyboard navigation, screen reader support
-- **Edge Cases** — empty states, error states, loading states
+- **User Goals** -- what users are trying to accomplish
+- **User Flow** -- step-by-step interaction sequence
+- **Component Spec** -- each UI component with props, states, interactions
+- **Responsive Behavior** -- how layout adapts across breakpoints
+- **Accessibility** -- ARIA labels, keyboard navigation, screen reader support
+- **Edge Cases** -- empty states, error states, loading states
 
 ## Rules
 - Follow existing UI patterns and component library
@@ -380,13 +380,13 @@ You are a senior developer working on {{PROJECT_NAME}}.
 {{CONVENTIONS}}
 
 ## Your Assigned Service
-{{SERVICE_NAME}} — {{SERVICE_PATH}}
+{{SERVICE_NAME}} -- {{SERVICE_PATH}}
 
 ## Your Task
 - Write clean, tested, production-ready code
 - Follow existing patterns in the codebase
-- Keep files focused — one responsibility per file
-- Implement only what is specified — no gold-plating
+- Keep files focused -- one responsibility per file
+- Implement only what is specified -- no gold-plating
 
 ## Process
 1. Read the implementation plan or task description
@@ -402,7 +402,7 @@ You are a senior developer working on {{PROJECT_NAME}}.
 - Commit after each logical unit of work
 - Follow DRY, YAGNI, and KISS principles
 - No hardcoded secrets or environment-specific values
-- Handle errors explicitly — no silent failures
+- Handle errors explicitly -- no silent failures
 
 ## Output
 Write implementation summary to: {{OUTPUT_DIR}}/developer-output.md
@@ -448,7 +448,7 @@ You are a senior test engineer working on {{PROJECT_NAME}}.
 
 ## Your Task
 - Write comprehensive tests for new and modified code
-- Follow TDD when possible (red → green → refactor)
+- Follow TDD when possible (red -> green -> refactor)
 - Ensure edge cases and error paths are covered
 - Run the full test suite and report results
 
@@ -461,24 +461,24 @@ You are a senior test engineer working on {{PROJECT_NAME}}.
 6. Run full test suite and report results
 
 ## Test Categories
-- **Unit tests** — individual functions/methods in isolation
-- **Integration tests** — component interactions, API endpoints
-- **Edge cases** — empty inputs, boundary values, error conditions
-- **Error paths** — invalid inputs, network failures, timeouts
+- **Unit tests** -- individual functions/methods in isolation
+- **Integration tests** -- component interactions, API endpoints
+- **Edge cases** -- empty inputs, boundary values, error conditions
+- **Error paths** -- invalid inputs, network failures, timeouts
 
 ## Output Format
 Write results to: {{OUTPUT_DIR}}/test-report.md
 
 Structure:
-- **Tests Written** — list of new test files and test cases
-- **Coverage** — which code paths are covered
-- **Test Results** — pass/fail summary with details
-- **Gaps** — any untested areas with justification
+- **Tests Written** -- list of new test files and test cases
+- **Coverage** -- which code paths are covered
+- **Test Results** -- pass/fail summary with details
+- **Gaps** -- any untested areas with justification
 
 ## Rules
 - Test behavior, not implementation details
 - Each test should test one thing
-- Tests must be deterministic — no flaky tests
+- Tests must be deterministic -- no flaky tests
 - Use descriptive test names that explain the expected behavior
 - Mock external dependencies, not internal code
 ```
@@ -525,27 +525,27 @@ You are a senior code reviewer working on {{PROJECT_NAME}}.
 - Verify implementation matches the design/architecture
 
 ## Review Checklist
-1. **Correctness** — does the code do what it's supposed to?
-2. **Design** — does it follow the architecture? Are boundaries clean?
-3. **Readability** — can another developer understand this in 30 seconds?
-4. **DRY** — is there duplication that should be extracted?
-5. **Error handling** — are failures handled explicitly?
-6. **Testing** — are tests adequate? Do they test the right things?
-7. **Security** — any injection risks, exposed secrets, auth gaps?
-8. **Performance** — any obvious N+1 queries, unbounded loops, memory leaks?
+1. **Correctness** -- does the code do what it's supposed to?
+2. **Design** -- does it follow the architecture? Are boundaries clean?
+3. **Readability** -- can another developer understand this in 30 seconds?
+4. **DRY** -- is there duplication that should be extracted?
+5. **Error handling** -- are failures handled explicitly?
+6. **Testing** -- are tests adequate? Do they test the right things?
+7. **Security** -- any injection risks, exposed secrets, auth gaps?
+8. **Performance** -- any obvious N+1 queries, unbounded loops, memory leaks?
 
 ## Output Format
 Write results to: {{OUTPUT_DIR}}/verification-report.md
 
 Structure:
-- **Summary** — overall assessment (PASS/WARN/FAIL)
-- **Critical Issues** — must fix before merge
-- **Warnings** — should fix, but not blocking
-- **Suggestions** — nice-to-have improvements
-- **What Was Done Well** — positive feedback
+- **Summary** -- overall assessment (PASS/WARN/FAIL)
+- **Critical Issues** -- must fix before merge
+- **Warnings** -- should fix, but not blocking
+- **Suggestions** -- nice-to-have improvements
+- **What Was Done Well** -- positive feedback
 
 ## Rules
-- Be specific — point to exact files and line numbers
+- Be specific -- point to exact files and line numbers
 - Explain WHY something is a problem, not just that it is
 - Distinguish between blocking issues and suggestions
 - Do not nitpick style if it follows existing patterns
@@ -593,26 +593,26 @@ You are a senior security analyst working on {{PROJECT_NAME}}.
 - Identify data exposure and injection risks
 
 ## Security Checklist
-1. **Injection** — SQL, NoSQL, OS command, LDAP injection risks
-2. **Authentication** — weak passwords, missing MFA, session management
-3. **Authorization** — broken access control, privilege escalation
-4. **Data Exposure** — sensitive data in logs, responses, or storage
-5. **Security Misconfiguration** — default credentials, verbose errors, open ports
-6. **XSS** — reflected, stored, DOM-based cross-site scripting
-7. **Dependencies** — known vulnerabilities in dependencies
-8. **Secrets** — hardcoded API keys, tokens, passwords in code
-9. **Cryptography** — weak algorithms, improper key management
-10. **Input Validation** — missing or insufficient validation
+1. **Injection** -- SQL, NoSQL, OS command, LDAP injection risks
+2. **Authentication** -- weak passwords, missing MFA, session management
+3. **Authorization** -- broken access control, privilege escalation
+4. **Data Exposure** -- sensitive data in logs, responses, or storage
+5. **Security Misconfiguration** -- default credentials, verbose errors, open ports
+6. **XSS** -- reflected, stored, DOM-based cross-site scripting
+7. **Dependencies** -- known vulnerabilities in dependencies
+8. **Secrets** -- hardcoded API keys, tokens, passwords in code
+9. **Cryptography** -- weak algorithms, improper key management
+10. **Input Validation** -- missing or insufficient validation
 
 ## Output Format
 Write results to: {{OUTPUT_DIR}}/security-report.md
 
 Structure:
-- **Summary** — overall security assessment (PASS/WARN/FAIL)
-- **Critical Vulnerabilities** — must fix immediately
-- **Warnings** — potential risks to address
-- **Compliance Status** — OWASP Top 10 checklist results
-- **Recommendations** — security improvements
+- **Summary** -- overall security assessment (PASS/WARN/FAIL)
+- **Critical Vulnerabilities** -- must fix immediately
+- **Warnings** -- potential risks to address
+- **Compliance Status** -- OWASP Top 10 checklist results
+- **Recommendations** -- security improvements
 
 ## Rules
 - Every finding must include: severity, location, description, fix recommendation
@@ -643,7 +643,7 @@ You are a senior DevOps engineer working on {{PROJECT_NAME}}.
 {{PROJECT_STRUCTURE}}
 
 ## Your Assigned Service
-{{SERVICE_NAME}} — {{SERVICE_PATH}}
+{{SERVICE_NAME}} -- {{SERVICE_PATH}}
 
 ## Your Task
 - Configure CI/CD pipelines and deployment
@@ -663,13 +663,13 @@ You are a senior DevOps engineer working on {{PROJECT_NAME}}.
 Write results to: {{OUTPUT_DIR}}/devops-report.md
 
 Structure:
-- **Changes Made** — list of infrastructure/config changes
-- **Environment Variables** — new or modified env vars needed
-- **Deployment Steps** — how to deploy these changes
-- **Rollback Plan** — how to revert if issues arise
+- **Changes Made** -- list of infrastructure/config changes
+- **Environment Variables** -- new or modified env vars needed
+- **Deployment Steps** -- how to deploy these changes
+- **Rollback Plan** -- how to revert if issues arise
 
 ## Rules
-- Never hardcode secrets — use environment variables or secret managers
+- Never hardcode secrets -- use environment variables or secret managers
 - Dockerfiles should use multi-stage builds for production
 - Pin dependency versions in Dockerfiles
 - CI/CD pipelines must run tests before deployment
@@ -713,12 +713,12 @@ You are a senior technical writer working on {{PROJECT_NAME}}.
 Write results to: {{OUTPUT_DIR}}/docs-output.md
 
 Structure:
-- **Docs Created** — new documentation files
-- **Docs Updated** — existing files modified
-- **API Changes** — new or modified API endpoints documented
+- **Docs Created** -- new documentation files
+- **Docs Updated** -- existing files modified
+- **API Changes** -- new or modified API endpoints documented
 
 ## Rules
-- Documentation must match the actual code — no aspirational docs
+- Documentation must match the actual code -- no aspirational docs
 - Code examples must be tested and working
 - Use the project's existing documentation style
 - Keep docs close to the code they describe
@@ -780,11 +780,11 @@ You are a senior cloud cost analyst working on {{PROJECT_NAME}}.
 Write results to: {{OUTPUT_DIR}}/cost-report.md
 
 Structure:
-- **Summary** — estimated monthly impact
-- **Critical Findings** — immediate cost savings available
-- **Optimization Recommendations** — prioritized by savings
-- **Cost-Efficient Patterns Detected** — what's already done well
-- **Estimated Savings** — monthly and annual projections
+- **Summary** -- estimated monthly impact
+- **Critical Findings** -- immediate cost savings available
+- **Optimization Recommendations** -- prioritized by savings
+- **Cost-Efficient Patterns Detected** -- what's already done well
+- **Estimated Savings** -- monthly and annual projections
 
 ## Rules
 - Always estimate dollar impact for each recommendation
@@ -817,7 +817,7 @@ Create `agents/_bases/cloud-aws.md`:
 ```markdown
 ---
 name: aws-cloud
-description: AWS infrastructure specialist — IaC, services, monitoring, compliance
+description: AWS infrastructure specialist -- IaC, services, monitoring, compliance
 model: inherit
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
@@ -862,7 +862,7 @@ Create `agents/_bases/cloud-gcp.md`:
 ```markdown
 ---
 name: gcp-cloud
-description: GCP infrastructure specialist — IaC, services, monitoring, compliance
+description: GCP infrastructure specialist -- IaC, services, monitoring, compliance
 model: inherit
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
@@ -907,7 +907,7 @@ Create `agents/_bases/cloud-azure.md`:
 ```markdown
 ---
 name: azure-cloud
-description: Azure infrastructure specialist — IaC, services, monitoring, compliance
+description: Azure infrastructure specialist -- IaC, services, monitoring, compliance
 model: inherit
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
@@ -952,7 +952,7 @@ Create `agents/_bases/cloud-terraform.md`:
 ```markdown
 ---
 name: terraform-infra
-description: Terraform IaC specialist — modules, state, cross-cloud resources
+description: Terraform IaC specialist -- modules, state, cross-cloud resources
 model: inherit
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
@@ -996,7 +996,7 @@ Create `agents/_bases/cloud-pulumi.md`:
 ```markdown
 ---
 name: pulumi-infra
-description: Pulumi IaC specialist — stacks, cross-cloud resources
+description: Pulumi IaC specialist -- stacks, cross-cloud resources
 model: inherit
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
@@ -1729,7 +1729,7 @@ description: Use when running /orchestrate to manage phased multi-agent workflow
 
 # Orchestrator
 
-Manages phased multi-agent workflows. This skill runs at the controller level — it is NOT a dispatched subagent. It instructs the top-level session how to dispatch agents, manage phases, and handle cross-verification.
+Manages phased multi-agent workflows. This skill runs at the controller level -- it is NOT a dispatched subagent. It instructs the top-level session how to dispatch agents, manage phases, and handle cross-verification.
 
 ## Prerequisites
 - Project agents must exist in `.claude/agents/` (run `/assemble-team` first)
@@ -1741,8 +1741,8 @@ Assess task complexity and select pattern:
 
 | Complexity | Detection | Pattern |
 |-----------|-----------|---------|
-| Simple | Single file change, bug fix, small tweak | Developer → Tester → Reviewer |
-| Medium | Single service, moderate scope | Requirements → Developer + Tester → Reviewer |
+| Simple | Single file change, bug fix, small tweak | Developer -> Tester -> Reviewer |
+| Medium | Single service, moderate scope | Requirements -> Developer + Tester -> Reviewer |
 | Complex | Multi-service or large scope | Full 6-phase workflow |
 | Plan exists | `docs/superpowers/plans/*` matches task | Skip to Phase 4 |
 | Spec exists | `docs/superpowers/specs/*` matches task | Skip to Phase 3 |
@@ -1750,24 +1750,24 @@ Assess task complexity and select pattern:
 ## Existing Work Detection
 
 Before starting, scan for existing work:
-1. Previous run? (`.claude/orchestrator/runs/*`) → Resume from last completed phase
-2. Spec exists? (`docs/superpowers/specs/*`) → Skip Phase 1-2
-3. Plan exists? (`docs/superpowers/plans/*`) → Skip Phase 1-3
-4. Nothing found → Start from Phase 1
+1. Previous run? (`.claude/orchestrator/runs/*`) -> Resume from last completed phase
+2. Spec exists? (`docs/superpowers/specs/*`) -> Skip Phase 1-2
+3. Plan exists? (`docs/superpowers/plans/*`) -> Skip Phase 1-3
+4. Nothing found -> Start from Phase 1
 
 ## Phase Execution
 
-### Phase 1: Discovery (parallel — read-only agents)
+### Phase 1: Discovery (parallel -- read-only agents)
 Dispatch in parallel:
-- Requirements Analyst → writes `requirements.md`
-- Researcher → writes `research-report.md`
+- Requirements Analyst -> writes `requirements.md`
+- Researcher -> writes `research-report.md`
 
 **Gate:** Read both outputs. Confirm scope is clear and complete. If questions remain, ask user.
 
-### Phase 2: Design (parallel — read-only agents)
+### Phase 2: Design (parallel -- read-only agents)
 Dispatch in parallel:
-- Architect → writes `architecture.md`
-- UX Designer → writes `ux-spec.md` (skip if no UI work)
+- Architect -> writes `architecture.md`
+- UX Designer -> writes `ux-spec.md` (skip if no UI work)
 
 Pass Phase 1 summaries as context to both agents.
 
@@ -1795,24 +1795,24 @@ Each developer follows `superpowers:executing-plans`.
 - All tests pass
 - Deployment config is valid
 
-### Phase 5: Verification (parallel — read-only agents)
+### Phase 5: Verification (parallel -- read-only agents)
 Dispatch in parallel:
-- Reviewer → writes `verification-report.md`
-- Security Analyst → writes `security-report.md`
-- Cost Optimizer → writes `cost-report.md` (if cloud detected)
+- Reviewer -> writes `verification-report.md`
+- Security Analyst -> writes `security-report.md`
+- Cost Optimizer -> writes `cost-report.md` (if cloud detected)
 
 Both follow the superpowers 2-reviewer pattern.
 
 **Gate scoring:**
 - PASS (100) / WARN (50) / FAIL (0) per verifier
-- Average ≥ 80% → proceed
-- 50-79% → proceed with warnings
-- < 50% → route back to Phase 4 (max 3 retries)
+- Average ≥ 80% -> proceed
+- 50-79% -> proceed with warnings
+- < 50% -> route back to Phase 4 (max 3 retries)
 
 If verification fails, invoke `superpowers:receiving-code-review` for developer to process feedback.
 
 ### Phase 6: Completion
-- Dispatch Documentation Writer → updates docs
+- Dispatch Documentation Writer -> updates docs
 - Invoke `superpowers:finishing-a-development-branch`
 - Write final run-log.md summary
 
@@ -1820,8 +1820,8 @@ If verification fails, invoke `superpowers:receiving-code-review` for developer 
 
 Create `.claude/orchestrator/runs/<date>-<task-name>/run-log.md` at start.
 Update after each phase completes with status markers:
-- `✓` = completed
-- `← CURRENT` = in progress
+- `OK` = completed
+- `<- CURRENT` = in progress
 - Phase details: agent name, output file, gate result
 
 ## Resume Support
@@ -1836,7 +1836,7 @@ When `--resume` is used:
 
 - **Large outputs:** Agents write to files in run directory
 - **Small handoffs:** Controller reads output files, generates 3-5 sentence summary, injects into next phase agents' prompts
-- Full reports stay in files — only summaries travel between agents
+- Full reports stay in files -- only summaries travel between agents
 ```
 
 - [ ] **Step 3: Commit**
@@ -1879,15 +1879,15 @@ Check if `.claude/agents/` and `.claude/team-config.json` exist.
 1. Read `.claude/team-config.json` for previous state
 2. Scan current project state (manifests, file patterns, dependencies)
 3. Score each existing agent (0-100%) against current project:
-   - Framework match (25%) — correct framework/version referenced?
-   - File coverage (25%) — knows about current file patterns?
-   - Dependency awareness (20%) — references current dependencies?
-   - Convention alignment (15%) — matches project's CLAUDE.md?
-   - Completeness (15%) — has all required sections?
+   - Framework match (25%) -- correct framework/version referenced?
+   - File coverage (25%) -- knows about current file patterns?
+   - Dependency awareness (20%) -- references current dependencies?
+   - Convention alignment (15%) -- matches project's CLAUDE.md?
+   - Completeness (15%) -- has all required sections?
 4. Detect new services not in previous config
 5. Present health report:
    - Agents ≥ 80%: healthy (minor patch)
-   - Agents < 80%: STALE — will be fully regenerated
+   - Agents < 80%: STALE -- will be fully regenerated
    - New services: new agents needed
 6. Present actions: [A]pply all / [S]elect / [R]egenerate all / [K]eep
 7. Apply selected changes and update team-config.json
@@ -1911,9 +1911,9 @@ Find the devtools plugin install path from `~/.claude/plugins/installed_plugins.
 Read all profiles from `<plugin-path>/agents/_profiles/services/*.json`.
 
 For each directory in the project:
-1. Check each profile's `detect.files` — do these files exist?
-2. Check `detect.dependencies` — present in manifest?
-3. Check `detect.patterns` — do matching files exist?
+1. Check each profile's `detect.files` -- do these files exist?
+2. Check `detect.dependencies` -- present in manifest?
+3. Check `detect.patterns` -- do matching files exist?
 4. For cloud profiles, also check `detect.terraform_provider` in `*.tf` files
 5. Score each match (files + deps + patterns found)
 6. Keep matches with score > 0
@@ -1930,18 +1930,18 @@ If no exact match, use `general.json` as fallback.
 Show user:
 ```
 Detected services:
-  ✓ frontend (./frontend) — React
-  ✓ backend (./backend) — Node.js/Express
-  ✓ database — PostgreSQL
-  ✓ cloud — AWS (CDK)
+  OK frontend (./frontend) -- React
+  OK backend (./backend) -- Node.js/Express
+  OK database -- PostgreSQL
+  OK cloud -- AWS (CDK)
 
 Recommended team (6 agents):
-  ✓ react-frontend-developer
-  ✓ node-backend-developer
-  ✓ fullstack-tester
-  ✓ reviewer
-  ✓ devops
-  ✓ cost-optimizer
+  OK react-frontend-developer
+  OK node-backend-developer
+  OK fullstack-tester
+  OK reviewer
+  OK devops
+  OK cost-optimizer
 
 Optional (add any?):
   ○ architect
@@ -1963,25 +1963,25 @@ For each selected agent:
 2. Read profile context for the agent's assigned service
 3. Apply `agent_customizations` from the profile (name_prefix, extra_instructions)
 4. Replace all `{{PLACEHOLDERS}}`:
-   - `{{PROJECT_NAME}}` — from git remote URL or directory name
-   - `{{TECH_STACK}}` — from profile `context` fields
-   - `{{PROJECT_STRUCTURE}}` — run `ls` on relevant directories
-   - `{{CONVENTIONS}}` — read CLAUDE.md if exists + profile conventions
-   - `{{SERVICE_NAME}}` / `{{SERVICE_PATH}}` — from detection result
-   - `{{TEST_RUNNER}}` — from profile context
-   - `{{OUTPUT_DIR}}` — `.claude/orchestrator/runs/<current-run>/`
+   - `{{PROJECT_NAME}}` -- from git remote URL or directory name
+   - `{{TECH_STACK}}` -- from profile `context` fields
+   - `{{PROJECT_STRUCTURE}}` -- run `ls` on relevant directories
+   - `{{CONVENTIONS}}` -- read CLAUDE.md if exists + profile conventions
+   - `{{SERVICE_NAME}}` / `{{SERVICE_PATH}}` -- from detection result
+   - `{{TEST_RUNNER}}` -- from profile context
+   - `{{OUTPUT_DIR}}` -- `.claude/orchestrator/runs/<current-run>/`
    - Cloud-specific: `{{AWS_SERVICES}}`, `{{CLOUD_PROVIDERS}}`, `{{INFRA_PATHS}}`, etc.
 5. Write to `.claude/agents/<generated-name>.md`
 
 ### Step 7: Write team-config.json
 
 Write `.claude/team-config.json` with:
-- `project_name` — from git or directory
-- `generated_at` — current timestamp
-- `detected_services` — list with paths, profiles, scores, dependencies
-- `agents` — list with name, file path, base template, service assignment, health score
-- `phase_config` — from composition profile
-- `project_snapshot` — file count, dependency hash, last commit
+- `project_name` -- from git or directory
+- `generated_at` -- current timestamp
+- `detected_services` -- list with paths, profiles, scores, dependencies
+- `agents` -- list with name, file path, base template, service assignment, health score
+- `phase_config` -- from composition profile
+- `project_snapshot` -- file count, dependency hash, last commit
 
 ### Step 8: Confirm
 
@@ -1998,9 +1998,9 @@ Run /agent <name> <task> to use an agent standalone.
 
 ### Cloud Agent Rules
 
-- Single cloud detected → enhance DevOps agent with cloud context (no separate cloud agent)
-- Multiple clouds detected → generate separate cloud agents + Cost Optimizer
-- Terraform/Pulumi detected → always generate infra agent
+- Single cloud detected -> enhance DevOps agent with cloud context (no separate cloud agent)
+- Multiple clouds detected -> generate separate cloud agents + Cost Optimizer
+- Terraform/Pulumi detected -> always generate infra agent
 - Cost Optimizer is always generated when any cloud is detected
 ```
 
@@ -2118,9 +2118,9 @@ Dispatch one or more agents directly without full orchestration.
 4. Display:
    ```
    Project agents (.claude/agents/):
-     react-frontend-developer  — React frontend specialist
-     node-backend-developer    — Node.js backend specialist
-     fullstack-tester          — Cross-service test writer
+     react-frontend-developer  -- React frontend specialist
+     node-backend-developer    -- Node.js backend specialist
+     fullstack-tester          -- Cross-service test writer
 
    Base agents (available with --generic):
      requirements, researcher, architect, ux-designer, developer,

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Create a personal portable Claude Code plugin repo with skills, agents, commands, hooks, memory system, and cross-platform templates — installable with one command on any machine.
+**Goal:** Create a personal portable Claude Code plugin repo with skills, agents, commands, hooks, memory system, and cross-platform templates -- installable with one command on any machine.
 
 **Architecture:** Single GitHub repo that serves as both a Claude Code plugin and a self-hosted marketplace. Components are discovered by convention. A SessionStart hook injects auto-memory detection and meta-skill context. Memory commands enable cross-machine sync via the plugin repo.
 
@@ -23,12 +23,12 @@
 | `.gitattributes` | Line ending normalization |
 | `skills/_template/SKILL.md` | Starter template for new skills |
 | `skills/using-devtools/SKILL.md` | Meta-skill: platform mapping and usage guide |
-| `skills/using-devtools/references/codex-tools.md` | Claude Code → Codex tool name mapping |
+| `skills/using-devtools/references/codex-tools.md` | Claude Code -> Codex tool name mapping |
 | `agents/_template.md` | Starter template for new agents |
 | `commands/_template.md` | Starter template for new commands |
 | `commands/remember.md` | Manual memory capture command |
-| `commands/memory-export.md` | Export local memories → plugin repo |
-| `commands/memory-import.md` | Import plugin repo memories → local |
+| `commands/memory-export.md` | Export local memories -> plugin repo |
+| `commands/memory-import.md` | Import plugin repo memories -> local |
 | `commands/memory-cleanup.md` | Review and prune stale memories |
 | `hooks/hooks.json` | Hook event registrations |
 | `hooks/session-start` | Bash SessionStart hook script |
@@ -117,7 +117,7 @@ Create `.claude-plugin/plugin.json`:
 ```json
 {
   "name": "devtools",
-  "description": "Personal portable toolkit — skills, agents, commands, and hooks across all projects",
+  "description": "Personal portable toolkit -- skills, agents, commands, and hooks across all projects",
   "version": "1.0.0",
   "author": { "name": "your-name" },
   "homepage": "https://github.com/your-username/devtools",
@@ -168,7 +168,7 @@ Run: `mkdir -p .codex`
 
 Create `.codex/INSTALL.md`:
 ```markdown
-# DevTools — Codex Installation
+# DevTools -- Codex Installation
 
 ## Setup
 
@@ -185,7 +185,7 @@ Create `.codex/INSTALL.md`:
    ln -s ~/.codex/devtools/skills ~/.agents/skills/devtools
    ```
 
-   > **Note:** Verify symlink path against current Codex docs — path may vary by version.
+   > **Note:** Verify symlink path against current Codex docs -- path may vary by version.
 
 3. For tool name differences between Claude Code and Codex, see:
    `skills/using-devtools/references/codex-tools.md`
@@ -304,21 +304,21 @@ Create `skills/using-devtools/SKILL.md`:
 ```markdown
 ---
 name: using-devtools
-description: Meta-skill — guides tool name mapping when running on non-Claude-Code platforms and provides overview of available devtools components
+description: Meta-skill -- guides tool name mapping when running on non-Claude-Code platforms and provides overview of available devtools components
 ---
 
 # Using DevTools
 
-This is your personal portable toolkit. It contains skills, agents, commands, hooks, and memory management — installed as a single Claude Code plugin.
+This is your personal portable toolkit. It contains skills, agents, commands, hooks, and memory management -- installed as a single Claude Code plugin.
 
 ## Available Components
 
 Check these directories for what's available:
-- `skills/` — workflow skills (auto-triggered based on description match)
-- `agents/` — specialized subagents
-- `commands/` — slash commands (e.g., `/remember`, `/memory-export`)
-- `hooks/` — lifecycle event triggers
-- `memories/` — portable cross-machine memories
+- `skills/` -- workflow skills (auto-triggered based on description match)
+- `agents/` -- specialized subagents
+- `commands/` -- slash commands (e.g., `/remember`, `/memory-export`)
+- `hooks/` -- lifecycle event triggers
+- `memories/` -- portable cross-machine memories
 
 ## Platform Support
 
@@ -363,7 +363,7 @@ git commit -m "feat: add using-devtools meta-skill with Codex tool mapping"
 
 ---
 
-### Task 6: Hooks — SessionStart with Auto-Memory Injection
+### Task 6: Hooks -- SessionStart with Auto-Memory Injection
 
 **Files:**
 - Create: `hooks/hooks.json`
@@ -432,8 +432,8 @@ memory_instructions="Watch for these patterns during our conversation:\\n- If I 
 session_context="<IMPORTANT>\\nYou have devtools installed.\\n\\n${using_devtools_escaped}\\n\\n<auto-memory>\\n${memory_instructions}\\n</auto-memory>\\n</IMPORTANT>"
 
 # Output context injection as JSON
-# Claude Code sets CLAUDE_PLUGIN_ROOT — emit only hookSpecificOutput
-# Other platforms (Cursor, etc.) — emit only additional_context
+# Claude Code sets CLAUDE_PLUGIN_ROOT -- emit only hookSpecificOutput
+# Other platforms (Cursor, etc.) -- emit only additional_context
 if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
   cat <<EOF
 {
@@ -609,13 +609,13 @@ $ARGUMENTS
 
 The user wants to save something to memory. Follow these steps:
 
-1. **Parse the input** — understand what the user wants remembered from $ARGUMENTS
+1. **Parse the input** -- understand what the user wants remembered from $ARGUMENTS
 
-2. **Determine memory type** — classify as one of:
-   - `user` — personal preference, tool choice, coding style
-   - `feedback` — correction to your behavior, "don't do X", "always do Y"
-   - `project` — project-specific convention, architecture pattern, quirk
-   - `reference` — external resource pointer, debugging solution, useful link
+2. **Determine memory type** -- classify as one of:
+   - `user` -- personal preference, tool choice, coding style
+   - `feedback` -- correction to your behavior, "don't do X", "always do Y"
+   - `project` -- project-specific convention, architecture pattern, quirk
+   - `reference` -- external resource pointer, debugging solution, useful link
 
    If the type is ambiguous, ask the user which type fits best.
 
@@ -638,13 +638,13 @@ The user wants to save something to memory. Follow these steps:
    ```
 
 4. **Save locally** based on type:
-   - `user` or `feedback` → write to `~/.claude/memory/` (global, user-level)
-   - `project` → write to `~/.claude/projects/<current-project-hash>/memory/` (project-specific)
-   - `reference` → write to `~/.claude/memory/` (global, user-level)
+   - `user` or `feedback` -> write to `~/.claude/memory/` (global, user-level)
+   - `project` -> write to `~/.claude/projects/<current-project-hash>/memory/` (project-specific)
+   - `reference` -> write to `~/.claude/memory/` (global, user-level)
 
-5. **Update MEMORY.md** — add an entry to the `MEMORY.md` index at the save location
+5. **Update MEMORY.md** -- add an entry to the `MEMORY.md` index at the save location
 
-6. **Confirm** — tell the user what was saved and where. Mention they can run `/memory-export` to sync it to the plugin repo for cross-machine access.
+6. **Confirm** -- tell the user what was saved and where. Mention they can run `/memory-export` to sync it to the plugin repo for cross-machine access.
 ```
 
 - [ ] **Step 2: Commit**
@@ -679,7 +679,7 @@ $ARGUMENTS
 
 Export local memories into the devtools plugin repo (`memories/` directory) so they sync across machines.
 
-1. **Find the plugin repo path** — locate the devtools plugin installation:
+1. **Find the plugin repo path** -- locate the devtools plugin installation:
    - Check `~/.claude/plugins/installed_plugins.json` for the devtools install path
    - The `memories/` directory is at `<install-path>/memories/`
 
@@ -688,10 +688,10 @@ Export local memories into the devtools plugin repo (`memories/` directory) so t
    - Project-level: `~/.claude/projects/<current-project-hash>/memory/*.md`
 
 3. **Filter based on $ARGUMENTS:**
-   - `all` — export everything found
-   - A specific name — export only that memory
-   - A type (user/feedback/project/reference) — export all of that type
-   - No argument — list all found memories and ask the user which to export
+   - `all` -- export everything found
+   - A specific name -- export only that memory
+   - A type (user/feedback/project/reference) -- export all of that type
+   - No argument -- list all found memories and ask the user which to export
 
 4. **For each selected memory:**
    - Read the memory file
@@ -742,7 +742,7 @@ $ARGUMENTS
 
 Import memories from the devtools plugin repo into local Claude memory on this machine.
 
-1. **Find the plugin repo path** — locate the devtools plugin installation:
+1. **Find the plugin repo path** -- locate the devtools plugin installation:
    - Check `~/.claude/plugins/installed_plugins.json` for the devtools install path
    - The `memories/` directory is at `<install-path>/memories/`
 
@@ -751,21 +751,21 @@ Import memories from the devtools plugin repo into local Claude memory on this m
    - Skip `.gitkeep` files and `MEMORY.md`
 
 3. **Filter based on $ARGUMENTS:**
-   - `all` — import everything
-   - A specific name — import only that memory
-   - A type — import all of that type
-   - No argument — list all available and ask the user which to import
+   - `all` -- import everything
+   - A specific name -- import only that memory
+   - A type -- import all of that type
+   - No argument -- list all available and ask the user which to import
 
 4. **Route each memory by type** (read from frontmatter):
-   - `user` or `feedback` → write to `~/.claude/memory/` (global)
-   - `project` → write to `~/.claude/projects/<current-project-hash>/memory/` (project-specific)
-   - `reference` → write to `~/.claude/memory/` (global)
+   - `user` or `feedback` -> write to `~/.claude/memory/` (global)
+   - `project` -> write to `~/.claude/projects/<current-project-hash>/memory/` (project-specific)
+   - `reference` -> write to `~/.claude/memory/` (global)
 
-5. **Check for duplicates** — if a memory with the same `name` already exists at the target location, ask the user whether to overwrite or skip.
+5. **Check for duplicates** -- if a memory with the same `name` already exists at the target location, ask the user whether to overwrite or skip.
 
 6. **Update MEMORY.md** index at each target location.
 
-7. **Confirm** — tell the user how many memories were imported and where.
+7. **Confirm** -- tell the user how many memories were imported and where.
 ```
 
 - [ ] **Step 2: Commit**
@@ -800,7 +800,7 @@ $ARGUMENTS
 
 Review accumulated memories and help the user prune stale or outdated ones.
 
-1. **Parse threshold** — default is 90 days. If $ARGUMENTS contains `--threshold <N>`, use N days instead.
+1. **Parse threshold** -- default is 90 days. If $ARGUMENTS contains `--threshold <N>`, use N days instead.
 
 2. **Scan all memory locations:**
    - Local user-level: `~/.claude/memory/*.md`
@@ -822,13 +822,13 @@ Review accumulated memories and help the user prune stale or outdated ones.
    ## Potentially Stale Memories (older than 90 days)
 
    ### User Preferences
-   - prefer-pnpm (captured: 2025-12-01) — "User prefers pnpm over npm"
+   - prefer-pnpm (captured: 2025-12-01) -- "User prefers pnpm over npm"
 
    ### Feedback
-   - no-mocking-db (captured: 2025-11-15) — "Don't mock the database in tests"
+   - no-mocking-db (captured: 2025-11-15) -- "Don't mock the database in tests"
 
    ## Recent Memories (keeping)
-   - use-vitest (captured: 2026-02-28) — "Use vitest instead of jest"
+   - use-vitest (captured: 2026-02-28) -- "Use vitest instead of jest"
    ```
 
 6. **Ask the user** which stale memories to remove. Accept:
@@ -855,7 +855,7 @@ git commit -m "feat: add /memory-cleanup command for pruning stale memories"
 
 ## Chunk 3: Platform Placeholders and Missing Files
 
-### Task 13: Cursor Plugin Config (Future — Full Content from Spec)
+### Task 13: Cursor Plugin Config (Future -- Full Content from Spec)
 
 **Files:**
 - Create: `.cursor-plugin/plugin.json`
@@ -871,7 +871,7 @@ Create `.cursor-plugin/plugin.json`:
 {
   "name": "devtools",
   "displayName": "DevTools",
-  "description": "Personal portable toolkit — skills, agents, commands, and hooks across all projects",
+  "description": "Personal portable toolkit -- skills, agents, commands, and hooks across all projects",
   "version": "1.0.0",
   "author": { "name": "your-name" },
   "license": "MIT",
@@ -905,7 +905,7 @@ Create `gemini-extension.json`:
 ```json
 {
   "name": "devtools",
-  "description": "Personal portable toolkit — skills, agents, commands, and hooks across all projects",
+  "description": "Personal portable toolkit -- skills, agents, commands, and hooks across all projects",
   "version": "1.0.0",
   "contextFileName": "GEMINI.md"
 }
@@ -915,7 +915,7 @@ Create `gemini-extension.json`:
 
 Create `GEMINI.md`:
 ```markdown
-# DevTools — Gemini CLI
+# DevTools -- Gemini CLI
 
 > This file is a placeholder. Fill in when adopting Gemini CLI.
 
@@ -928,7 +928,7 @@ Create `skills/using-devtools/references/gemini-tools.md`:
 ```markdown
 # Gemini CLI Tool Mapping
 
-> Placeholder — fill in when adopting Gemini CLI.
+> Placeholder -- fill in when adopting Gemini CLI.
 
 | Claude Code | Gemini Equivalent |
 |------------|------------------|
@@ -946,7 +946,7 @@ Run: `mkdir -p .opencode`
 
 Create `.opencode/INSTALL.md`:
 ```markdown
-# DevTools — OpenCode Installation
+# DevTools -- OpenCode Installation
 
 > This file is a placeholder. Fill in when adopting OpenCode.
 ```
@@ -997,8 +997,8 @@ Watch for these during conversation:
 
 ## Process
 
-1. **Detect** — recognize the pattern from the table above
-2. **Confirm** — ask: "Want me to remember this for future sessions?"
+1. **Detect** -- recognize the pattern from the table above
+2. **Confirm** -- ask: "Want me to remember this for future sessions?"
 3. **On confirmation:**
    - Determine memory type from the pattern
    - Generate a memory file with proper frontmatter:
@@ -1011,16 +1011,16 @@ Watch for these during conversation:
      last-reviewed: YYYY-MM-DD
      ```
    - Save to appropriate local path:
-     - `user`/`feedback`/`reference` → `~/.claude/memory/`
-     - `project` → `~/.claude/projects/<current-project-hash>/memory/`
+     - `user`/`feedback`/`reference` -> `~/.claude/memory/`
+     - `project` -> `~/.claude/projects/<current-project-hash>/memory/`
    - Update `MEMORY.md` index
    - Mention `/memory-export` for cross-machine sync
 
 ## Key Principles
 
-- **Never save without asking** — always confirm first
-- **One memory per moment** — don't batch multiple learnings
-- **Be specific** — descriptions should be clear enough to decide relevance later
+- **Never save without asking** -- always confirm first
+- **One memory per moment** -- don't batch multiple learnings
+- **Be specific** -- descriptions should be clear enough to decide relevance later
 ```
 
 - [ ] **Step 3: Commit**
@@ -1046,7 +1046,7 @@ Create `README.md`:
 # DevTools
 
 Personal portable toolkit for AI-assisted development.
-Skills, agents, commands, and hooks — one install, every machine.
+Skills, agents, commands, and hooks -- one install, every machine.
 
 ## Installation
 
@@ -1130,7 +1130,7 @@ git commit -m "docs: add README with installation and usage guide"
 
 Create `CLAUDE.md`:
 ```markdown
-# DevTools — Project Conventions
+# DevTools -- Project Conventions
 
 ## What This Repo Is
 
@@ -1138,13 +1138,13 @@ Personal portable Claude Code plugin. Contains skills, agents, commands, hooks, 
 
 ## Directory Layout
 
-- `skills/<name>/SKILL.md` — workflow skills with YAML frontmatter
-- `agents/<name>.md` — subagent definitions with YAML frontmatter
-- `commands/<name>.md` — slash commands with YAML frontmatter
-- `hooks/` — lifecycle event hooks (bash scripts + JSON config)
-- `memories/` — portable cross-machine memories
-- `.claude-plugin/` — plugin and marketplace metadata
-- `.codex/` — Codex platform support
+- `skills/<name>/SKILL.md` -- workflow skills with YAML frontmatter
+- `agents/<name>.md` -- subagent definitions with YAML frontmatter
+- `commands/<name>.md` -- slash commands with YAML frontmatter
+- `hooks/` -- lifecycle event hooks (bash scripts + JSON config)
+- `memories/` -- portable cross-machine memories
+- `.claude-plugin/` -- plugin and marketplace metadata
+- `.codex/` -- Codex platform support
 
 ## Adding Components
 
@@ -1152,8 +1152,8 @@ Copy the `_template` file in each directory as your starting point.
 
 ## Rules
 
-- Keep skills focused — one clear purpose per skill
-- Descriptions must be specific — they control when skills trigger
+- Keep skills focused -- one clear purpose per skill
+- Descriptions must be specific -- they control when skills trigger
 - Test on Claude Code before pushing (primary platform)
 - Version bump `.claude-plugin/plugin.json` on meaningful changes
 - Never commit secrets or `.env` files

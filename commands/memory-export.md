@@ -12,7 +12,7 @@ $ARGUMENTS
 
 Export local memories into the devtools plugin repo (`memories/` directory) so they sync across machines.
 
-1. **Find the plugin repo path** — locate the devtools plugin installation:
+1. **Find the plugin repo path** -- locate the devtools plugin installation:
    - Check `~/.claude/plugins/installed_plugins.json` for the devtools install path
    - The `memories/` directory is at `<install-path>/memories/`
 
@@ -21,10 +21,10 @@ Export local memories into the devtools plugin repo (`memories/` directory) so t
    - Project-level: `~/.claude/projects/<current-project-hash>/memory/*.md`
 
 3. **Filter based on $ARGUMENTS:**
-   - `all` — export everything found
-   - A specific name — export only that memory
-   - A type (user/feedback/project/reference) — export all of that type
-   - No argument — list all found memories and ask the user which to export
+   - `all` -- export everything found
+   - A specific name -- export only that memory
+   - A type (user/feedback/project/reference) -- export all of that type
+   - No argument -- list all found memories and ask the user which to export
 
 4. **For each selected memory:**
    - Read the memory file

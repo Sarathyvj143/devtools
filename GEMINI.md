@@ -1,4 +1,4 @@
-# DevTools — Gemini CLI
+# DevTools -- Gemini CLI
 
 > This file is a placeholder. Fill in when adopting Gemini CLI.
 

@@ -1,7 +1,7 @@
 ---
 description: Run a phased multi-agent workflow on a task
 argument-hint: <task description> [--phases N,N] [--resume]
-allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, Agent]
+allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, Agent, Skill]
 ---
 
 # Orchestrate

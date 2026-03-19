@@ -1,6 +1,6 @@
 ---
 name: testing
-description: Use when writing or running tests — comprehensive testing workflow with positive/negative scenarios, coverage enforcement, and multi-service coordination
+description: Use when writing or running tests -- comprehensive testing workflow with positive/negative scenarios, coverage enforcement, and multi-service coordination
 ---
 
 # Testing Skill
@@ -16,7 +16,7 @@ Before writing ANY tests, always do this first:
 
 #### 0a. Read Specs & Documentation First
 
-Scan for existing specifications and documentation — they define the CONTRACT of what should be tested:
+Scan for existing specifications and documentation -- they define the CONTRACT of what should be tested:
 
 ```bash
 # API specs (OpenAPI/Swagger)
@@ -55,10 +55,10 @@ cat .env.example 2>/dev/null
 | GraphQL schema | Every query/mutation: input types, return types, nullable fields, error responses |
 | Prisma/DB schema | Every model: required fields, optional fields, unique constraints, relations, defaults |
 | TypeScript types | Every interface: required props, optional props, union types, enum values |
-| Validation schemas (Zod/Joi/Pydantic) | Every validation rule: min/max, patterns, custom validators — test each rule |
+| Validation schemas (Zod/Joi/Pydantic) | Every validation rule: min/max, patterns, custom validators -- test each rule |
 | README | Documented features and expected behaviors |
 | Design spec | Requirements, acceptance criteria, user flows |
-| .env.example | Every env var documented — test with and without each one |
+| .env.example | Every env var documented -- test with and without each one |
 
 **Example: Testing from an OpenAPI spec:**
 ```
@@ -72,16 +72,16 @@ Found: openapi.yaml defines POST /api/auth/register
     400: { error: "Validation failed", details: [...] }
     409: { error: "Email already exists" }
 
-  → Generate tests for:
-  ✓ Valid registration → 201 + user + token
-  ✗ Missing email → 400 + validation error mentioning "email"
-  ✗ Invalid email format → 400
-  ✗ Password too short (7 chars) → 400
-  ✗ Password exactly 8 chars → 201 (boundary)
-  ✗ Name empty → 400
-  ✗ Name 100 chars → 201 (boundary)
-  ✗ Name 101 chars → 400 (boundary)
-  ✗ Duplicate email → 409
+  -> Generate tests for:
+  OK Valid registration -> 201 + user + token
+  ✗ Missing email -> 400 + validation error mentioning "email"
+  ✗ Invalid email format -> 400
+  ✗ Password too short (7 chars) -> 400
+  ✗ Password exactly 8 chars -> 201 (boundary)
+  ✗ Name empty -> 400
+  ✗ Name 100 chars -> 201 (boundary)
+  ✗ Name 101 chars -> 400 (boundary)
+  ✗ Duplicate email -> 409
 ```
 
 **Example: Testing from a Zod/Pydantic validation schema:**
@@ -93,18 +93,18 @@ Found: backend/src/validators/auth.validator.ts
     name: z.string().min(1).max(100).trim(),
   });
 
-  → Generate tests for EACH rule:
-  ✓ Valid data → passes
-  ✗ email: "" → fails (required)
-  ✗ email: "not-an-email" → fails (format)
-  ✗ email: null → fails (type)
-  ✗ password: "1234567" → fails (min 8)
-  ✗ password: "12345678" → passes (exactly 8, boundary)
-  ✗ password: "a".repeat(128) → passes (exactly 128, boundary)
-  ✗ password: "a".repeat(129) → fails (max 128)
-  ✗ name: "" → fails (min 1)
-  ✗ name: "   " → fails (trimmed = empty)
-  ✗ name: "a" → passes (exactly 1, boundary)
+  -> Generate tests for EACH rule:
+  OK Valid data -> passes
+  ✗ email: "" -> fails (required)
+  ✗ email: "not-an-email" -> fails (format)
+  ✗ email: null -> fails (type)
+  ✗ password: "1234567" -> fails (min 8)
+  ✗ password: "12345678" -> passes (exactly 8, boundary)
+  ✗ password: "a".repeat(128) -> passes (exactly 128, boundary)
+  ✗ password: "a".repeat(129) -> fails (max 128)
+  ✗ name: "" -> fails (min 1)
+  ✗ name: "   " -> fails (trimmed = empty)
+  ✗ name: "a" -> passes (exactly 1, boundary)
 ```
 
 #### 0b. Read Developer Output and Git Changes
@@ -119,7 +119,7 @@ git diff HEAD~5 -- '*.ts' '*.tsx' '*.py' '*.go'
 #### 0c. Read Usage Patterns (how the app is actually used)
 
 ```bash
-# Check for existing test files — they show what's already tested
+# Check for existing test files -- they show what's already tested
 find . -name "*.test.*" -o -name "*.spec.*" -o -name "test_*" 2>/dev/null | head -30
 
 # Check for Storybook (component usage patterns)
@@ -196,11 +196,11 @@ Understand:
 
 ### 2. Scan Test Scripts
 Read project test configuration:
-- `package.json` → scripts.test, scripts.test:unit, scripts.test:e2e, scripts.test:coverage
-- `pyproject.toml` → [tool.pytest], [tool.coverage]
-- `Makefile` → test targets
-- `docker-compose.test.yml` → test infrastructure
-- `.github/workflows/` → CI test commands
+- `package.json` -> scripts.test, scripts.test:unit, scripts.test:e2e, scripts.test:coverage
+- `pyproject.toml` -> [tool.pytest], [tool.coverage]
+- `Makefile` -> test targets
+- `docker-compose.test.yml` -> test infrastructure
+- `.github/workflows/` -> CI test commands
 - `jest.config.*`, `vitest.config.*`, `pytest.ini`, `setup.cfg`
 
 ### 3. Check MCP Servers
@@ -228,7 +228,7 @@ Before running tests, ensure the test environment is ready:
   - For Node: use `@faker-js/faker` or test factories
   - For Python: use `factory_boy` or `model_bakery`
   - For Go: use test helper functions
-- Seed data should be minimal — only what's needed for the test
+- Seed data should be minimal -- only what's needed for the test
 
 **Test Environment Variables:**
 - Check for `.env.test` or test-specific config
@@ -244,12 +244,12 @@ Before running tests, ensure the test environment is ready:
 | Concern | Linux/Mac | Windows |
 |---------|-----------|---------|
 | Path separators | `/` forward slashes | Use `/` in Node/Python (they handle it). Use `path.join()` in code. |
-| Line endings | LF | CRLF — use `.gitattributes` to normalize. Snapshot tests may diff on line endings. |
-| File permissions | `chmod +x` | Not applicable — skip permission tests on Windows |
+| Line endings | LF | CRLF -- use `.gitattributes` to normalize. Snapshot tests may diff on line endings. |
+| File permissions | `chmod +x` | Not applicable -- skip permission tests on Windows |
 | Symlinks | `ln -s` works | Needs developer mode or admin. Use junctions instead. |
-| Temp directories | `/tmp/` | `%TEMP%` / `os.tmpdir()` — use `os.tmpdir()` in code |
+| Temp directories | `/tmp/` | `%TEMP%` / `os.tmpdir()` -- use `os.tmpdir()` in code |
 | Shell commands in tests | `bash` commands | Use Node/Python APIs instead of shell commands in tests |
-| gunicorn | Works | Does NOT work — use waitress or uvicorn |
+| gunicorn | Works | Does NOT work -- use waitress or uvicorn |
 | Docker | `docker compose` | `docker compose` (same with Docker Desktop) |
 
 **Best practice:** Write tests using language APIs (fs, os, path) not shell commands. This makes tests cross-platform by default.
@@ -312,21 +312,21 @@ For each feature/change, plan tests across ALL these categories:
 
 ## Test Execution Order
 
-Write and run tests in this order — faster tests first, slower tests last:
+Write and run tests in this order -- faster tests first, slower tests last:
 
 ```
-1. Unit tests          (fastest — no external deps)
+1. Unit tests          (fastest -- no external deps)
    ├── Business logic
    ├── Utility functions
    ├── Validators
    └── Pure component rendering
           ↓
-2. Integration tests   (moderate — mocked external deps)
+2. Integration tests   (moderate -- mocked external deps)
    ├── API endpoint tests (with mocked DB)
    ├── Component tests (with mocked API)
    └── Middleware tests
           ↓
-3. Database tests      (moderate — needs test DB)
+3. Database tests      (moderate -- needs test DB)
    ├── Migration tests
    ├── Query tests
    └── Constraint tests
@@ -335,7 +335,7 @@ Write and run tests in this order — faster tests first, slower tests last:
    ├── API request/response shape matching
    └── Shared type consistency
           ↓
-5. E2E tests           (slowest — needs all services running)
+5. E2E tests           (slowest -- needs all services running)
    ├── Full user workflows
    ├── Cross-service data flow
    └── Auth flow end-to-end
@@ -360,14 +360,14 @@ Stop at first failure within each tier. Fix before moving to next tier.
 
 ## Test Writing Process
 
-1. **Read developer output** — know exactly what was implemented and what files changed
-2. **Check existing tests** — don't duplicate, extend
-3. **Follow existing patterns** — use same structure, utilities, mocking approach
-4. **Write test plan first** — list ALL scenarios (positive + negative + boundary) before writing code
-5. **Write failing tests** — TDD red phase
-6. **Group by feature** — not by type (all registration tests together, not all unit tests together)
-7. **Name descriptively** — `should return 401 when token is expired` not `test auth`
-8. **Run after each test file** — don't write all tests then run; write a file, run, verify, next file
+1. **Read developer output** -- know exactly what was implemented and what files changed
+2. **Check existing tests** -- don't duplicate, extend
+3. **Follow existing patterns** -- use same structure, utilities, mocking approach
+4. **Write test plan first** -- list ALL scenarios (positive + negative + boundary) before writing code
+5. **Write failing tests** -- TDD red phase
+6. **Group by feature** -- not by type (all registration tests together, not all unit tests together)
+7. **Name descriptively** -- `should return 401 when token is expired` not `test auth`
+8. **Run after each test file** -- don't write all tests then run; write a file, run, verify, next file
 
 ## Cross-Tester Coordination
 
@@ -381,11 +381,11 @@ When multiple tester agents run in parallel on the same project:
 
 ### Test File Ownership (prevents conflicts)
 Each tester owns specific test directories:
-- Frontend tester → `frontend/src/__tests__/` or `frontend/tests/`
-- Backend tester → `backend/tests/` or `backend/src/__tests__/`
-- Database tester → `tests/db/` or `backend/tests/db/`
-- Integration tester → `tests/integration/` or `tests/e2e/`
-- Cloud tester → `infra/tests/` or `tests/infra/`
+- Frontend tester -> `frontend/src/__tests__/` or `frontend/tests/`
+- Backend tester -> `backend/tests/` or `backend/src/__tests__/`
+- Database tester -> `tests/db/` or `backend/tests/db/`
+- Integration tester -> `tests/integration/` or `tests/e2e/`
+- Cloud tester -> `infra/tests/` or `tests/infra/`
 
 **Never write tests outside your owned directory.**
 
@@ -443,7 +443,7 @@ test-coverage:
 
 ## Coverage Enforcement
 
-Thresholds apply to **new/changed code only** — not the entire project. An existing project with 30% coverage won't suddenly fail.
+Thresholds apply to **new/changed code only** -- not the entire project. An existing project with 30% coverage won't suddenly fail.
 
 | Metric | New Code Threshold | Aspirational Project Goal |
 |--------|-------------------|--------------------------|
@@ -454,16 +454,16 @@ Thresholds apply to **new/changed code only** — not the entire project. An exi
 
 After running tests, check coverage:
 1. Run coverage command
-2. Parse coverage report — focus on files changed in this task
+2. Parse coverage report -- focus on files changed in this task
 3. If new code is below threshold, identify uncovered lines
 4. Write tests for uncovered critical paths first
 5. Report coverage per service (for multi-service projects)
 6. Report both: "New code: 92% lines" and "Overall project: 45% lines"
 
 **Match test depth to task scope:**
-- Bug fix → unit tests + the specific failing case
-- Small feature → unit + integration tests
-- Large feature → full test suite (unit + integration + E2E + security)
+- Bug fix -> unit tests + the specific failing case
+- Small feature -> unit + integration tests
+- Large feature -> full test suite (unit + integration + E2E + security)
 - Don't run performance/accessibility tests for a one-line bug fix
 
 ## Feature-Based Test Coordination
@@ -476,14 +476,14 @@ Feature: User Login
 │   ├── Login form renders correctly
 │   ├── Form validation (empty email, invalid format)
 │   ├── Submit sends correct API request
-│   ├── Success → redirect to dashboard
-│   ├── Failure → show error message
+│   ├── Success -> redirect to dashboard
+│   ├── Failure -> show error message
 │   └── Loading state during API call
 ├── Backend Tests (node-tester)
-│   ├── POST /api/auth/login with valid credentials → 200 + JWT
-│   ├── POST /api/auth/login with wrong password → 401
-│   ├── POST /api/auth/login with nonexistent user → 401
-│   ├── Rate limiting after 5 failed attempts → 429
+│   ├── POST /api/auth/login with valid credentials -> 200 + JWT
+│   ├── POST /api/auth/login with wrong password -> 401
+│   ├── POST /api/auth/login with nonexistent user -> 401
+│   ├── Rate limiting after 5 failed attempts -> 429
 │   └── JWT token contains correct claims
 ├── Database Tests (db-tester)
 │   ├── User record is fetched correctly
@@ -491,8 +491,8 @@ Feature: User Login
 │   ├── Session is created on successful login
 │   └── Index on email column is used (query plan)
 └── Integration Tests (fullstack-tester)
-    ├── End-to-end login flow (frontend → backend → DB → response)
-    ├── Login with expired session → redirect to login page
+    ├── End-to-end login flow (frontend -> backend -> DB -> response)
+    ├── Login with expired session -> redirect to login page
     └── Concurrent login from multiple devices
 ```
 
@@ -516,7 +516,7 @@ Check `.mcp.json` and `~/.claude/.mcp.json` for available servers.
 Write results to: `the current run directory (find with: `ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1`)/test-report.md`
 
 ```markdown
-# Test Report — [Feature Name]
+# Test Report -- [Feature Name]
 
 ## Summary
 - Total: 45 tests
@@ -526,11 +526,11 @@ Write results to: `the current run directory (find with: `ls -td .claude/orchest
 - Coverage: 87% (lines), 78% (branches)
 
 ## Tests by Category
-### Positive (20 tests) — 20 passed
-### Negative (15 tests) — 13 passed, 2 failed
-### Boundary (5 tests) — 5 passed
-### Security (3 tests) — 3 passed
-### Performance (2 tests) — 1 passed, 1 skipped
+### Positive (20 tests) -- 20 passed
+### Negative (15 tests) -- 13 passed, 2 failed
+### Boundary (5 tests) -- 5 passed
+### Security (3 tests) -- 3 passed
+### Performance (2 tests) -- 1 passed, 1 skipped
 
 ## Failed Tests
 ### test_login_rate_limiting

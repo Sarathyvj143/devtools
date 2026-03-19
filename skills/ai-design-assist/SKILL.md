@@ -1,6 +1,6 @@
 ---
 name: ai-design-assist
-description: Use when designing UI/UX or frontend features — detects available AI tools (Gemini, etc.) and uses them for design planning, mockups, and visual decisions
+description: Use when designing UI/UX or frontend features -- detects available AI tools (Gemini, etc.) and uses them for design planning, mockups, and visual decisions
 ---
 
 # AI-Assisted Design
@@ -33,6 +33,9 @@ grep -i "figma\|design\|image\|screenshot\|browser" .mcp.json ~/.claude/.mcp.jso
 Gemini excels at visual and design tasks. When Gemini CLI is installed, use it for:
 
 ### Frontend Design Planning
+
+> **Note:** `{{SERVICE_PATH}}` below refers to the agent's service path, set during `/assemble-team` generation. These are agent-template placeholders that get replaced during generation, not skill-level variables.
+
 ```bash
 # Ask Gemini to analyze existing UI and suggest improvements
 gemini "Analyze the frontend at {{SERVICE_PATH}} and suggest UI component structure for: <task description>"
@@ -107,8 +110,8 @@ If no external AI tools are available:
 
 | Agent | When to invoke |
 |-------|---------------|
-| UX Designer | Always — before writing ux-spec.md |
-| Frontend Developer | When implementing UI components — for layout/structure planning |
+| UX Designer | Always -- before writing ux-spec.md |
+| Frontend Developer | When implementing UI components -- for layout/structure planning |
 
 Do NOT use this skill for:
 - Backend developers (no UI work)
@@ -120,6 +123,6 @@ Do NOT use this skill for:
 ## Rules
 - AI suggestions are a STARTING POINT, not the final answer
 - Always validate AI output against project conventions (CLAUDE.md, existing patterns)
-- Never blindly copy AI-generated code — adapt to project style
+- Never blindly copy AI-generated code -- adapt to project style
 - If AI tool is not available, skip this step and proceed with manual design
 - Log which AI tool was used in the agent's output report

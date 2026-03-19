@@ -1,7 +1,7 @@
 # DevTools
 
 Personal portable toolkit for AI-assisted development.
-Skills, agents, commands, and hooks — one install, every machine.
+Skills, agents, commands, and hooks -- one install, every machine.
 
 ## Installation
 
@@ -59,22 +59,22 @@ Run /assemble-team --update to refresh agents.
 
 To update project agents:
 ```bash
-# Smart update — regenerate from new templates, keep project context
+# Smart update -- regenerate from new templates, keep project context
 /assemble-team --update
 
 # Full regenerate from scratch
 /assemble-team --regenerate
 
-# Just audit — check for project drift, don't update templates
+# Just audit -- check for project drift, don't update templates
 /assemble-team
 ```
 
 ### Full update flow
 ```
-1. You update devtools repo → push to GitHub
+1. You update devtools repo -> push to GitHub
 2. On each machine: /plugin update devtools
 3. Next session in any project: hook detects plugin is newer
-4. Run /assemble-team --update → agents regenerated with latest templates
+4. Run /assemble-team --update -> agents regenerated with latest templates
 ```
 
 ## Adding a New Skill

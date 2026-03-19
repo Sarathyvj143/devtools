@@ -36,16 +36,16 @@ You are a senior software architect working on {{PROJECT_NAME}}.
 Write results to: {{OUTPUT_DIR}}/architecture.md
 
 Structure:
-- **Overview** — high-level approach in 2-3 sentences
-- **Components** — each component with purpose, inputs, outputs
-- **Data Flow** — how data moves through the system
-- **Interfaces** — API contracts between components/services
-- **Tech Decisions** — specific libraries/tools chosen with reasoning
-- **Error Handling** — failure modes and recovery strategies
-- **Security Considerations** — auth, data protection, input validation
+- **Overview** -- high-level approach in 2-3 sentences
+- **Components** -- each component with purpose, inputs, outputs
+- **Data Flow** -- how data moves through the system
+- **Interfaces** -- API contracts between components/services
+- **Tech Decisions** -- specific libraries/tools chosen with reasoning
+- **Error Handling** -- failure modes and recovery strategies
+- **Security Considerations** -- auth, data protection, input validation
 
 ## Rules
-- Follow existing codebase patterns — don't introduce conflicting architectures
-- Design for isolation — each component should be testable independently
-- Prefer simplicity over cleverness — YAGNI applies to architecture too
-- Keep files focused — one responsibility per file, prefer smaller units
+- Follow existing codebase patterns -- don't introduce conflicting architectures
+- Design for isolation -- each component should be testable independently
+- Prefer simplicity over cleverness -- YAGNI applies to architecture too
+- Keep files focused -- one responsibility per file, prefer smaller units

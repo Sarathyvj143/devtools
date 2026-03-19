@@ -12,6 +12,41 @@ $ARGUMENTS
 
 Analyze the current project, detect services and technologies, and generate a team of project-specific agents.
 
+### Platform Notes
+
+- Bash examples are provided for Linux/macOS and Windows with Git Bash/WSL.
+- For Windows PowerShell users without bash, use the PowerShell equivalents below.
+
+#### PowerShell Equivalents (Step 1)
+
+```powershell
+# Get current plugin version (from devtools plugin install path)
+$pluginPath = python -c "import json; d=json.load(open(r'$env:USERPROFILE\\.claude\\plugins\\installed_plugins.json')); print([v[0]['installPath'] for k,v in d.items() if 'devtools' in k][0])"
+$pluginVersion = python -c "import json; print(json.load(open(r'$pluginPath\\.claude-plugin\\plugin.json'))['version'])"
+$pluginCommit = (git -C $pluginPath rev-parse HEAD) 2>$null
+$pluginDate = (git -C $pluginPath log -1 --format=%ci) 2>$null
+"Plugin version: $pluginVersion"
+"Plugin commit: $pluginCommit"
+"Plugin updated: $pluginDate"
+
+# Read team-config.json for when agents were generated
+if (Test-Path .claude\\team-config.json) {
+  $c = Get-Content .claude\\team-config.json | ConvertFrom-Json
+  "Agents generated with: $($c.plugin_version) $($c.plugin_commit) $($c.generated_at)"
+}
+```
+
+```powershell
+# Detecting what changed in the plugin (PowerShell)
+$oldCommit = "<from team-config.json plugin_commit>"
+$newCommit = (git -C $pluginPath rev-parse HEAD)
+$changedFiles = (git -C $pluginPath diff --name-only $oldCommit $newCommit) 2>$null
+$changedBases = $changedFiles | Where-Object { $_ -like "agents/_bases/*" }
+$changedProfiles = $changedFiles | Where-Object { $_ -like "agents/_profiles/*" }
+$changedSkills = $changedFiles | Where-Object { $_ -like "skills/*" }
+$changedCommands = $changedFiles | Where-Object { $_ -like "commands/*" }
+```
+
 ### Step 1: Check for Existing Team and Plugin Version
 
 Check if `.claude/agents/` and `.claude/team-config.json` exist.
@@ -62,9 +97,9 @@ fi
 
 | Situation | Action |
 |-----------|--------|
-| No agents exist | First run → go to Step 2 |
-| Plugin commit matches team-config → project unchanged | "Team is up to date" → audit only for project drift |
-| Plugin commit CHANGED since generation | "Plugin updated! Base templates may have improved." → recommend regenerate |
+| No agents exist | First run -> go to Step 2 |
+| Plugin commit matches team-config -> project unchanged | "Team is up to date" -> audit only for project drift |
+| Plugin commit CHANGED since generation | "Plugin updated! Base templates may have improved." -> recommend regenerate |
 | Project changed (new deps, new files) | Audit and patch/regenerate as needed |
 | `--regenerate` flag | Skip audit, regenerate all |
 | `--update` flag | Regenerate only from new plugin templates, keep project context |
@@ -91,15 +126,15 @@ DevTools plugin updated since team was generated!
 1. Read `.claude/team-config.json` for previous state
 2. Scan current project state (manifests, file patterns, dependencies)
 3. Score each existing agent (0-100%) against current project:
-   - Framework match (25%) — correct framework/version referenced?
-   - File coverage (25%) — knows about current file patterns?
-   - Dependency awareness (20%) — references current dependencies?
-   - Convention alignment (15%) — matches project's CLAUDE.md?
-   - Completeness (15%) — has all required sections?
+   - Framework match (25%) -- correct framework/version referenced?
+   - File coverage (25%) -- knows about current file patterns?
+   - Dependency awareness (20%) -- references current dependencies?
+   - Convention alignment (15%) -- matches project's CLAUDE.md?
+   - Completeness (15%) -- has all required sections?
 4. Detect new services not in previous config
 5. Present health report:
    - Agents >= 80%: healthy (minor patch)
-   - Agents < 80%: STALE — will be fully regenerated
+   - Agents < 80%: STALE -- will be fully regenerated
    - New services: new agents needed
 6. Present actions: [A]pply all / [S]elect / [R]egenerate all / [K]eep
 7. Apply selected changes and update team-config.json
@@ -136,7 +171,7 @@ For each generated agent in .claude/agents/:
 
   1. Read the generated agent file
   2. Extract project-specific sections (everything between ## markers that contains
-     real project values — tech stack, service path, startup commands, etc.)
+     real project values -- tech stack, service path, startup commands, etc.)
   3. Read the NEW base template from plugin (e.g., agents/_bases/tester-backend.md)
   4. Check: has the base template actually changed?
      - Compare plugin's base template git hash vs what's recorded in team-config.json
@@ -144,7 +179,7 @@ For each generated agent in .claude/agents/:
      - If changed: continue to regenerate
   5. Regenerate: apply new base template + inject preserved project context
   6. Write updated agent to .claude/agents/<name>.md
-  7. Log: "Updated <name>.md — new template applied, project context preserved"
+  7. Log: "Updated <name>.md -- new template applied, project context preserved"
 ```
 
 #### Detecting what changed in the plugin:
@@ -167,29 +202,29 @@ CHANGED_COMMANDS=$(echo "$CHANGED_FILES" | grep "commands/" || true)
 
 Show user what changed:
 ```
-Plugin updated: v1.0.0 → v1.1.0
+Plugin updated: v1.0.0 -> v1.1.0
 
 Changed base templates:
-  ✱ agents/_bases/tester-backend.md (enhanced MCP integration)
-  ✱ agents/_bases/tester-frontend.md (added spec-driven testing)
-  ✱ agents/_bases/developer-frontend.md (added Gemini support)
-  · agents/_bases/developer.md (unchanged)
-  · agents/_bases/devops.md (unchanged)
+  * agents/_bases/tester-backend.md (enhanced MCP integration)
+  * agents/_bases/tester-frontend.md (added spec-driven testing)
+  * agents/_bases/developer-frontend.md (added Gemini support)
+  - agents/_bases/developer.md (unchanged)
+  - agents/_bases/devops.md (unchanged)
 
 Changed profiles:
-  ✱ agents/_profiles/services/backend-node.json (added runner commands)
+  * agents/_profiles/services/backend-node.json (added runner commands)
 
 Changed skills:
-  ✱ skills/testing/SKILL.md (added coverage thresholds)
-  ✱ skills/ai-design-assist/SKILL.md (new skill)
+  * skills/testing/SKILL.md (added coverage thresholds)
+  * skills/ai-design-assist/SKILL.md (new skill)
 
 Your project agents affected:
-  ✱ node-backend-tester.md → will be regenerated (base template changed)
-  ✱ react-frontend-tester.md → will be regenerated (base template changed)
-  ✱ react-frontend-developer.md → will be regenerated (base template changed + new Gemini support)
-  · node-backend-developer.md → no update needed (base template unchanged)
-  · postgres-db-tester.md → no update needed
-  · integration-tester.md → no update needed
+  * node-backend-tester.md -> will be regenerated (base template changed)
+  * react-frontend-tester.md -> will be regenerated (base template changed)
+  * react-frontend-developer.md -> will be regenerated (base template changed + new Gemini support)
+  - node-backend-developer.md -> no update needed (base template unchanged)
+  - postgres-db-tester.md -> no update needed
+  - integration-tester.md -> no update needed
 
 Proceed? [Y]es / [N]o / [S]elect which to update
 ```
@@ -246,9 +281,9 @@ Find the devtools plugin install path from `~/.claude/plugins/installed_plugins.
 Read all profiles from `<plugin-path>/agents/_profiles/services/*.json`.
 
 For each directory in the project:
-1. Check each profile's `detect.files` — do these files exist?
-2. Check `detect.dependencies` — present in manifest?
-3. Check `detect.patterns` — do matching files exist?
+1. Check each profile's `detect.files` -- do these files exist?
+2. Check `detect.dependencies` -- present in manifest?
+3. Check `detect.patterns` -- do matching files exist?
 4. For cloud profiles, also check `detect.terraform_provider` in `*.tf` files
 5. Score each match (files + deps + patterns found)
 6. Keep matches with score > 0
@@ -265,10 +300,10 @@ If no exact match, use `general.json` as fallback.
 Show user:
 ```
 Detected services:
-  frontend (./frontend) — React
-  backend (./backend) — Node.js/Express
-  database — PostgreSQL
-  cloud — AWS (CDK)
+  frontend (./frontend) -- React
+  backend (./backend) -- Node.js/Express
+  database -- PostgreSQL
+  cloud -- AWS (CDK)
 
 Recommended team (N agents):
   react-frontend-developer
@@ -327,48 +362,48 @@ grep -i "figma\|design\|image\|browser\|screenshot" .mcp.json ~/.claude/.mcp.jso
 ```
 
 **When Gemini is available, bake it into ONLY frontend/UI agents:**
-- **UX Designer** → add Gemini design planning (user flows, component structure, responsive layouts, accessibility review)
-- **Frontend Developer** → add Gemini implementation planning (component tree from UX spec, responsive layout)
+- **UX Designer** -> add Gemini design planning (user flows, component structure, responsive layouts, accessibility review)
+- **Frontend Developer** -> add Gemini implementation planning (component tree from UX spec, responsive layout)
 
 **NOT added to:** backend developer, database tester, devops, security, architect, etc.
 
 **When Gemini is NOT available:**
-- Frontend/UX agents work without it — all Gemini sections have fallback instructions
+- Frontend/UX agents work without it -- all Gemini sections have fallback instructions
 - No impact on functionality, just less AI assistance for UI work
 
 **Frontend developer template selection:**
-- If frontend service detected AND Gemini available → use `developer-frontend.md` (has Gemini integration)
-- If frontend service detected AND no Gemini → use `developer-frontend.md` (Gemini sections have fallbacks)
-- For non-frontend services → always use generic `developer.md` (no Gemini)
+- If frontend service detected AND Gemini available -> use `developer-frontend.md` (has Gemini integration)
+- If frontend service detected AND no Gemini -> use `developer-frontend.md` (Gemini sections have fallbacks)
+- For non-frontend services -> always use generic `developer.md` (no Gemini)
 
 ### Step 6b: Detect Actual Project Commands
 
-Scan the project to discover the **real commands, ports, and paths** that will be baked into agents. This happens ONCE during assembly — generated agents get concrete commands, not detection logic.
+Scan the project to discover the **real commands, ports, and paths** that will be baked into agents. This happens ONCE during assembly -- generated agents get concrete commands, not detection logic.
 
 #### 6a: For each service, discover:
 
 **Package manager:**
 ```
 Check service directory for lockfile:
-  pnpm-lock.yaml → pnpm
-  yarn.lock      → yarn
-  bun.lockb      → bun
-  package-lock.json → npm
-  Pipfile → pipenv
-  poetry.lock → poetry
-  requirements.txt → pip
-  go.mod → go
+  pnpm-lock.yaml -> pnpm
+  yarn.lock      -> yarn
+  bun.lockb      -> bun
+  package-lock.json -> npm
+  Pipfile -> pipenv
+  poetry.lock -> poetry
+  requirements.txt -> pip
+  go.mod -> go
 ```
 
 **Start command (dev mode):**
 ```
-Node: Read package.json scripts → find "dev" or "start:dev" or "start"
+Node: Read package.json scripts -> find "dev" or "start:dev" or "start"
       Example result: "pnpm run dev"
-Python: Check for manage.py → "python manage.py runserver"
-        Check deps for fastapi → "uvicorn app.main:app --reload --port 8000"
-        Check deps for flask → "python -m flask run --port=8000 --reload"
-Go: Find cmd/ directory → "go run ./cmd/server"
-Docker: Read docker-compose.yml → "docker compose up <service>"
+Python: Check for manage.py -> "python manage.py runserver"
+        Check deps for fastapi -> "uvicorn app.main:app --reload --port 8000"
+        Check deps for flask -> "python -m flask run --port=8000 --reload"
+Go: Find cmd/ directory -> "go run ./cmd/server"
+Docker: Read docker-compose.yml -> "docker compose up <service>"
 ```
 
 **Port:**
@@ -388,8 +423,8 @@ If not found: use "/" (root)
 
 **Test command:**
 ```
-Node: Read package.json scripts.test → "pnpm run test"
-Python: Check for pytest in deps → "python -m pytest tests/ -v"
+Node: Read package.json scripts.test -> "pnpm run test"
+Python: Check for pytest in deps -> "python -m pytest tests/ -v"
 Go: "go test ./... -v"
 ```
 
@@ -417,10 +452,10 @@ Go: "go mod download"
 From the detected services and their `depends_on` in profiles:
 ```
 Example result:
-  1. postgres (docker compose up -d postgres) — port 5432
-  2. redis (docker compose up -d redis) — port 6379
-  3. backend (cd backend && source venv/bin/activate && python -m flask run --port=8000) — port 8000
-  4. frontend (cd frontend && pnpm run dev) — port 5173
+  1. postgres (docker compose up -d postgres) -- port 5432
+  2. redis (docker compose up -d redis) -- port 6379
+  3. backend (cd backend && source venv/bin/activate && python -m flask run --port=8000) -- port 8000
+  4. frontend (cd frontend && pnpm run dev) -- port 5173
 ```
 
 #### 6c: Build health check commands per service
@@ -440,21 +475,21 @@ For each selected agent:
 2. Read profile context for the agent's assigned service
 3. Apply `agent_customizations` from the profile (name_prefix, extra_instructions)
 4. Replace all `{{PLACEHOLDERS}}` with **actual values discovered in Step 6**:
-   - `{{PROJECT_NAME}}` — from git remote URL or directory name
-   - `{{TECH_STACK}}` — from profile `context` fields
-   - `{{PROJECT_STRUCTURE}}` — run `ls` on relevant directories
-   - `{{CONVENTIONS}}` — read CLAUDE.md if exists + profile conventions
-   - `{{SERVICE_NAME}}` / `{{SERVICE_PATH}}` — from detection result (actual path)
-   - `{{TEST_RUNNER}}` — actual test command discovered (e.g., "pnpm run test")
-   - `{{TEST_COMMANDS}}` — concrete test run commands (e.g., "cd backend && python -m pytest tests/ -v")
-   - `{{DATABASE_TYPE}}` — detected database type (e.g., "PostgreSQL", "MongoDB")
-   - `{{STARTUP_COMMANDS}}` — concrete service startup commands for dev-runner
-   - `{{PRODUCTION_COMMANDS}}` — concrete build/start commands for prod-runner
-   - `{{SERVICES_UNDER_TEST}}` — list of all services for integration tester
-   - `{{SERVICE_TEST_INSTRUCTIONS}}` — merged tester instructions from profiles
-   - `{{AI_TOOLS}}` — detected AI tools and their availability (Gemini, Cursor, design MCP)
+   - `{{PROJECT_NAME}}` -- from git remote URL or directory name
+   - `{{TECH_STACK}}` -- from profile `context` fields
+   - `{{PROJECT_STRUCTURE}}` -- run `ls` on relevant directories
+   - `{{CONVENTIONS}}` -- read CLAUDE.md if exists + profile conventions
+   - `{{SERVICE_NAME}}` / `{{SERVICE_PATH}}` -- from detection result (actual path)
+   - `{{TEST_RUNNER}}` -- actual test command discovered (e.g., "pnpm run test")
+   - `{{TEST_COMMANDS}}` -- concrete test run commands (e.g., "cd backend && python -m pytest tests/ -v")
+   - `{{DATABASE_TYPE}}` -- detected database type (e.g., "PostgreSQL", "MongoDB")
+   - `{{STARTUP_COMMANDS}}` -- concrete service startup commands for dev-runner
+   - `{{PRODUCTION_COMMANDS}}` -- concrete build/start commands for prod-runner
+   - `{{SERVICES_UNDER_TEST}}` -- list of all services for integration tester
+   - `{{SERVICE_TEST_INSTRUCTIONS}}` -- merged tester instructions from profiles
+   - `{{AI_TOOLS}}` -- detected AI tools and their availability (Gemini, Cursor, design MCP)
    - Cloud-specific: `{{AWS_SERVICES}}`, `{{CLOUD_PROVIDERS}}`, `{{INFRA_PATHS}}`, etc.
-   - NOTE: Do NOT replace `{{OUTPUT_DIR}}` — testers resolve the run directory at runtime using `ls -td .claude/orchestrator/runs/*/`
+   - NOTE: Do NOT replace `{{OUTPUT_DIR}}` -- testers resolve the run directory at runtime using `ls -td .claude/orchestrator/runs/*/`
 5. **Add generation header** to the top of every generated agent (before the frontmatter):
    ```markdown
    <!-- Generated by devtools v1.1.0 (commit abc1234) at 2026-03-17T14:30:00Z -->
@@ -498,11 +533,11 @@ The generated dev-runner agent gets **concrete commands**, not detection logic:
 - Depends on: backend
 ```
 
-The agent just reads these and executes them in order — no guessing.
+The agent just reads these and executes them in order -- no guessing.
 
 #### Special Handling: Prod Runner
 
-Same approach — concrete production commands:
+Same approach -- concrete production commands:
 
 ```markdown
 ## Production Commands (detected by /assemble-team)
@@ -571,9 +606,9 @@ Instead of one generic tester, generate **multiple specialized tester agents** b
 
 **MCP integration:**
 - Check `.mcp.json` and `~/.claude/.mcp.json` for testing MCP servers
-- If Playwright/Puppeteer MCP found → add to frontend tester's available tools
-- If Database MCP found → add to database tester's available tools
-- If API Client MCP found → add to integration tester's available tools
+- If Playwright/Puppeteer MCP found -> add to frontend tester's available tools
+- If Database MCP found -> add to database tester's available tools
+- If API Client MCP found -> add to integration tester's available tools
 - Add discovered MCP tools to each tester's prompt as `{{MCP_TOOLS}}`
 
 **Test script updates:**
@@ -582,18 +617,18 @@ Each tester agent is responsible for updating the project's test scripts (packag
 ### Step 8: Write team-config.json
 
 Write `.claude/team-config.json` with:
-- `project_name` — from git or directory
-- `generated_at` — current timestamp
-- **`plugin_version`** — devtools plugin version (e.g., "1.0.0")
-- **`plugin_commit`** — git commit hash of the plugin when agents were generated
-- **`plugin_path`** — path to devtools plugin installation
-- `detected_services` — list with paths, profiles, scores, dependencies, **discovered commands**
-- `agents` — list with name, file path, base template, service assignment, health score
-- `phase_config` — from composition profile
-- `project_snapshot` — file count, dependency hash, last commit
-- `ai_tools` — detected AI tools (Gemini, etc.) and availability
-- `commands` — all discovered commands per service (start, test, build, health check, port)
-- `log_dir` — path pattern for service logs: `.claude/logs/<timestamp>/`
+- `project_name` -- from git or directory
+- `generated_at` -- current timestamp
+- **`plugin_version`** -- devtools plugin version (e.g., "1.0.0")
+- **`plugin_commit`** -- git commit hash of the plugin when agents were generated
+- **`plugin_path`** -- path to devtools plugin installation
+- `detected_services` -- list with paths, profiles, scores, dependencies, **discovered commands**
+- `agents` -- list with name, file path, base template, service assignment, health score
+- `phase_config` -- from composition profile
+- `project_snapshot` -- file count, dependency hash, last commit
+- `ai_tools` -- detected AI tools (Gemini, etc.) and availability
+- `commands` -- all discovered commands per service (start, test, build, health check, port)
+- `log_dir` -- path pattern for service logs: `.claude/logs/<timestamp>/`
 
 Example `commands` section in team-config.json:
 ```json
@@ -674,8 +709,8 @@ Example `agents` section in team-config.json (tracks per-agent generation state)
 The `base_template_hash` field enables smart updates:
 - During `--update`, compute current hash of each base template in the plugin
 - Compare against stored hash in team-config.json
-- If hash changed → this agent needs regeneration
-- If hash unchanged → skip (no update needed)
+- If hash changed -> this agent needs regeneration
+- If hash unchanged -> skip (no update needed)
 
 ### Step 9: Confirm
 

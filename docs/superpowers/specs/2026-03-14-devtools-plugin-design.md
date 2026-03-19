@@ -1,4 +1,4 @@
-# DevTools — Personal Portable Plugin
+# DevTools -- Personal Portable Plugin
 
 **Date:** 2026-03-14
 **Status:** Approved
@@ -8,12 +8,12 @@
 
 ## 1. Overview
 
-A personal portable toolkit packaged as a Claude Code plugin that installs with a single command on any machine. Contains skills, agents, slash commands, hooks, and MCP server configs. Starts as a skeleton with templates — components are added over time.
+A personal portable toolkit packaged as a Claude Code plugin that installs with a single command on any machine. Contains skills, agents, slash commands, hooks, and MCP server configs. Starts as a skeleton with templates -- components are added over time.
 
 ### Goals
 - One-command install across 4-6 machines
 - Works with Claude Code and Codex (extensible to Cursor, Gemini CLI, OpenCode later)
-- Skeleton/template approach — ready to fill, not pre-loaded with content
+- Skeleton/template approach -- ready to fill, not pre-loaded with content
 - Single GitHub repo serves as both plugin and marketplace
 
 ### Non-Goals
@@ -32,12 +32,12 @@ devtools/
 │   └── marketplace.json         # Self-hosted marketplace manifest
 ├── .codex/
 │   └── INSTALL.md               # Codex installation guide
-├── .cursor-plugin/              # Future — Cursor support (includes component pointers)
+├── .cursor-plugin/              # Future -- Cursor support (includes component pointers)
 │   └── plugin.json
-├── .opencode/                   # Future — OpenCode support
+├── .opencode/                   # Future -- OpenCode support
 │   └── INSTALL.md
-├── gemini-extension.json        # Future — Gemini CLI extension manifest
-├── GEMINI.md                    # Future — Gemini CLI tool mapping
+├── gemini-extension.json        # Future -- Gemini CLI extension manifest
+├── GEMINI.md                    # Future -- Gemini CLI tool mapping
 ├── .gitignore                   # Repo hygiene
 ├── .gitattributes               # Line ending normalization
 ├── memories/                    # Portable memories (cross-machine sync)
@@ -54,29 +54,29 @@ devtools/
 │   └── using-devtools/
 │       ├── SKILL.md             # Meta-skill: platform tool mapping
 │       └── references/
-│           ├── codex-tools.md   # Claude Code → Codex tool names
-│           └── gemini-tools.md  # Claude Code → Gemini tool names
+│           ├── codex-tools.md   # Claude Code -> Codex tool names
+│           └── gemini-tools.md  # Claude Code -> Gemini tool names
 ├── agents/
 │   └── _template.md             # Starter template for new agents
 ├── commands/
 │   ├── _template.md             # Starter template for new commands
 │   ├── remember.md              # Manual memory capture (/remember)
-│   ├── memory-export.md         # Export local memories → plugin repo
-│   ├── memory-import.md         # Import plugin repo → local machine
+│   ├── memory-export.md         # Export local memories -> plugin repo
+│   ├── memory-import.md         # Import plugin repo -> local machine
 │   └── memory-cleanup.md        # Review and prune stale memories
 ├── hooks/
 │   ├── hooks.json               # Hook event registrations
 │   ├── session-start            # Bash hook script
 │   └── run-hook.cmd             # Windows polyglot wrapper
 ├── .mcp.json                    # MCP server config template (copy to project)
-├── tests/                       # Future — skill and integration tests
+├── tests/                       # Future -- skill and integration tests
 ├── README.md                    # Usage + installation docs
 └── CLAUDE.md                    # Project conventions
 ```
 
 ### Future platform directories
-- `.cursor-plugin/` — requires explicit component pointers in `plugin.json` (unlike Claude Code's convention-based discovery)
-- `.opencode/`, `GEMINI.md`, `gemini-extension.json` — created as empty placeholders, activated when adopting that platform
+- `.cursor-plugin/` -- requires explicit component pointers in `plugin.json` (unlike Claude Code's convention-based discovery)
+- `.opencode/`, `GEMINI.md`, `gemini-extension.json` -- created as empty placeholders, activated when adopting that platform
 - `references/` folder inside `using-devtools` skill maps tool names between platforms
 - `gemini-extension.json` format: `{"name": "devtools", "description": "...", "version": "1.0.0", "contextFileName": "GEMINI.md"}`
 
@@ -86,12 +86,12 @@ devtools/
 
 ### `.claude-plugin/plugin.json`
 
-Claude Code discovers components by convention (scanning `skills/`, `agents/`, `commands/`, `hooks/hooks.json`), so this file contains only identity and metadata — no component pointers.
+Claude Code discovers components by convention (scanning `skills/`, `agents/`, `commands/`, `hooks/hooks.json`), so this file contains only identity and metadata -- no component pointers.
 
 ```json
 {
   "name": "devtools",
-  "description": "Personal portable toolkit — skills, agents, commands, and hooks across all projects",
+  "description": "Personal portable toolkit -- skills, agents, commands, and hooks across all projects",
   "version": "1.0.0",
   "author": { "name": "your-name" },
   "homepage": "https://github.com/your-username/devtools",
@@ -101,13 +101,13 @@ Claude Code discovers components by convention (scanning `skills/`, `agents/`, `
 }
 ```
 
-### `.cursor-plugin/plugin.json` (Future — Cursor needs explicit pointers)
+### `.cursor-plugin/plugin.json` (Future -- Cursor needs explicit pointers)
 
 ```json
 {
   "name": "devtools",
   "displayName": "DevTools",
-  "description": "Personal portable toolkit — skills, agents, commands, and hooks across all projects",
+  "description": "Personal portable toolkit -- skills, agents, commands, and hooks across all projects",
   "version": "1.0.0",
   "author": { "name": "your-name" },
   "license": "MIT",
@@ -158,7 +158,7 @@ The repo is both a plugin (installable) and a marketplace (discoverable).
 See `.codex/INSTALL.md`:
 1. Clone repo: `git clone https://github.com/your-username/devtools.git ~/.codex/devtools`
 2. Symlink skills: `mkdir -p ~/.agents/skills && ln -s ~/.codex/devtools/skills ~/.agents/skills/devtools`
-   > **Note:** Verify symlink path against current Codex docs — path may vary by version.
+   > **Note:** Verify symlink path against current Codex docs -- path may vary by version.
 3. Reference tool mapping in `skills/using-devtools/references/codex-tools.md`
 
 ### Auto-configure per project (optional)
@@ -266,7 +266,7 @@ What to do with the arguments
 ```
 
 - `session-start` bash script runs on every session start
-- `run-hook.cmd` is a Windows polyglot wrapper (detects platform, finds bash on Windows via Git for Windows paths) — copied from the superpowers reference implementation
+- `run-hook.cmd` is a Windows polyglot wrapper (detects platform, finds bash on Windows via Git for Windows paths) -- copied from the superpowers reference implementation
 - Hooks can be extended with additional events: `PreToolUse`, `PostToolUse`, `Notification`, `Stop`, `SubagentStop`
 
 ### Hook Output Contract
@@ -289,9 +289,9 @@ The `session-start` hook reads the `using-devtools` skill content and injects it
 
 ## 7. MCP Server Configuration
 
-### `.mcp.json` (template — copy to project)
+### `.mcp.json` (template -- copy to project)
 
-> **Note:** Claude Code reads `.mcp.json` from project roots and `~/.claude/.mcp.json`, not from plugin directories. This file is a **template** — copy it into your project or home `.claude/` directory to use.
+> **Note:** Claude Code reads `.mcp.json` from project roots and `~/.claude/.mcp.json`, not from plugin directories. This file is a **template** -- copy it into your project or home `.claude/` directory to use.
 
 ```json
 {
@@ -333,7 +333,7 @@ Add server configs as needed. Example entry:
 
 ### Adding a skill
 1. `cp -r skills/_template skills/my-skill`
-2. Edit `skills/my-skill/SKILL.md` — update frontmatter and content
+2. Edit `skills/my-skill/SKILL.md` -- update frontmatter and content
 3. Commit and push
 4. `/plugin update devtools` on each machine
 
@@ -373,7 +373,7 @@ A hook-driven + command system that detects moments worth remembering during ses
 | User corrections/feedback | "No, do it this way", "don't use X" | `feedback` |
 | Project discoveries | AI learns architecture patterns, file conventions, quirks | `project` |
 | Tool/workflow preferences | User consistently chooses pnpm, prefers functional style | `user` |
-| Debugging solutions | Tricky bug solved — root cause + fix pattern | `reference` |
+| Debugging solutions | Tricky bug solved -- root cause + fix pattern | `reference` |
 
 ### Behavior: Confirm Before Save
 
@@ -392,7 +392,7 @@ Only saves if the user confirms. Never auto-saves without consent.
 
 1. **SessionStart hook injection:** The `session-start` hook injects instructions telling the model to watch for memory-worthy patterns (corrections, preferences, discoveries, debugging resolutions). This makes the model aware throughout the session without requiring a skill invocation.
 
-2. **Manual command fallback:** `/remember <description>` — user explicitly tells the model to save something. Works when auto-detection misses a moment.
+2. **Manual command fallback:** `/remember <description>` -- user explicitly tells the model to save something. Works when auto-detection misses a moment.
 
 ### Storage: Dual-Location
 
@@ -401,7 +401,7 @@ Only saves if the user confirms. Never auto-saves without consent.
 - Writes memory files and updates `MEMORY.md` index
 - Per-project for `project` type memories
 - User-level at `~/.claude/memory/` for `user` and `feedback` type memories (global preferences)
-- Immediate — no commit/push needed
+- Immediate -- no commit/push needed
 
 **Secondary (portable):** Plugin repo at `devtools/memories/`
 - Travels with the plugin across machines
@@ -426,7 +426,7 @@ Always ask before saving. Format: "Want me to remember this for future sessions?
 
 #### Command: `commands/remember.md`
 
-Manual memory capture — user explicitly saves something:
+Manual memory capture -- user explicitly saves something:
 - Usage: `/remember prefer pnpm over npm for all projects`
 - Prompts for memory type (user/feedback/project/reference) if not obvious
 - Saves to appropriate local path based on type
@@ -445,9 +445,9 @@ Exports selected local memories into `devtools/memories/` for cross-machine port
 Imports portable memories from plugin repo into local Claude memory on a new machine:
 1. Reads `devtools/memories/**/*.md`
 2. Routes by `type` frontmatter field:
-   - `user` and `feedback` → `~/.claude/memory/` (global)
-   - `project` → `~/.claude/projects/<current>/memory/` (project-specific)
-   - `reference` → `~/.claude/memory/` (global)
+   - `user` and `feedback` -> `~/.claude/memory/` (global)
+   - `project` -> `~/.claude/projects/<current>/memory/` (project-specific)
+   - `reference` -> `~/.claude/memory/` (global)
 3. Updates `MEMORY.md` index at each target location
 
 #### Command: `commands/memory-cleanup.md`
@@ -470,8 +470,8 @@ devtools/
 │   └── reference/              # Debugging solutions, external pointers
 ├── commands/
 │   ├── remember.md             # Manual memory capture
-│   ├── memory-export.md        # Export local → plugin repo
-│   ├── memory-import.md        # Import plugin repo → local
+│   ├── memory-export.md        # Export local -> plugin repo
+│   ├── memory-import.md        # Import plugin repo -> local
 │   └── memory-cleanup.md       # Review and prune stale memories
 ```
 
@@ -499,13 +499,13 @@ Always use `pnpm` instead of `npm` for package management.
 
 ```
 Machine A (working):
-  Session hook detects preference → confirms with user → saves locally
-  User runs /memory-export → selects memories conversationally → copies to devtools/memories/
+  Session hook detects preference -> confirms with user -> saves locally
+  User runs /memory-export -> selects memories conversationally -> copies to devtools/memories/
   User commits + pushes
 
 Machine B (new session):
-  /plugin update devtools → pulls latest memories
-  User runs /memory-import → routes to correct local paths by type
+  /plugin update devtools -> pulls latest memories
+  User runs /memory-import -> routes to correct local paths by type
   Future sessions on Machine B now have the memories
 ```
 
@@ -517,8 +517,8 @@ Machine B (new session):
 - Agents go in `agents/<name>.md` with YAML frontmatter
 - Commands go in `commands/<name>.md` with YAML frontmatter
 - Copy `_template` in each directory as starting point
-- Keep skills focused — one clear purpose per skill
-- Descriptions must be specific — they control when skills trigger
+- Keep skills focused -- one clear purpose per skill
+- Descriptions must be specific -- they control when skills trigger
 - Test on Claude Code before pushing (primary platform)
 - Version bump `plugin.json` on meaningful changes
 

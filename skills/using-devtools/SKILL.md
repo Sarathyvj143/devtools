@@ -1,20 +1,20 @@
 ---
 name: using-devtools
-description: Meta-skill — guides tool name mapping when running on non-Claude-Code platforms and provides overview of available devtools components
+description: Meta-skill -- guides tool name mapping when running on non-Claude-Code platforms and provides overview of available devtools components
 ---
 
 # Using DevTools
 
-This is your personal portable toolkit. It contains skills, agents, commands, hooks, and memory management — installed as a single Claude Code plugin.
+This is your personal portable toolkit. It contains skills, agents, commands, hooks, and memory management -- installed as a single Claude Code plugin.
 
 ## Available Components
 
 Check these directories for what's available:
-- `skills/` — workflow skills (auto-triggered based on description match)
-- `agents/` — specialized subagents
-- `commands/` — slash commands (e.g., `/remember`, `/memory-export`)
-- `hooks/` — lifecycle event triggers
-- `memories/` — portable cross-machine memories
+- `skills/` -- workflow skills (auto-triggered based on description match)
+- `agents/` -- specialized subagents
+- `commands/` -- slash commands (e.g., `/remember`, `/memory-export`)
+- `hooks/` -- lifecycle event triggers
+- `memories/` -- portable cross-machine memories
 
 ## Platform Support
 

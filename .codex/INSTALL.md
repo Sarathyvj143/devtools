@@ -1,4 +1,4 @@
-# DevTools — Codex Installation
+# DevTools -- Codex Installation
 
 ## Setup (Linux/Mac)
 
@@ -15,7 +15,7 @@
    ln -s ~/.codex/devtools/skills ~/.agents/skills/devtools
    ```
 
-   > **Note:** Verify symlink path against current Codex docs — path may vary by version.
+   > **Note:** Verify symlink path against current Codex docs -- path may vary by version.
 
 ## Setup (Windows)
 
@@ -25,7 +25,7 @@
    git clone https://github.com/Sarathyvj143/devtools.git %USERPROFILE%\.codex\devtools
    ```
 
-2. Create a directory junction (symlink alternative — no admin required):
+2. Create a directory junction (symlink alternative -- no admin required):
 
    ```cmd
    mkdir %USERPROFILE%\.agents\skills 2>nul

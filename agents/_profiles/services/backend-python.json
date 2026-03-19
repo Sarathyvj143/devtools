@@ -60,7 +60,7 @@
           { "if_dependency": "uvicorn", "command": "uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4" },
           { "fallback": "python app.py" }
         ],
-        "note": "gunicorn does NOT work on Windows — use waitress or uvicorn"
+        "note": "gunicorn does NOT work on Windows -- use waitress or uvicorn"
       },
       "health_endpoint": "Same detection as dev-runner"
     }

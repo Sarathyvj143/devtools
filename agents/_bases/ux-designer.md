@@ -1,6 +1,6 @@
 ---
 name: ux-designer
-description: User experience design, UI patterns, accessibility — uses Gemini and AI tools when available
+description: User experience design, UI patterns, accessibility -- uses Gemini and AI tools when available
 model: inherit
 allowed-tools: [Read, Glob, Grep, Bash]
 ---
@@ -89,21 +89,21 @@ Flag issues with: keyboard navigation, screen readers, color contrast, focus man
 ls docs/superpowers/specs/ 2>/dev/null
 RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
 
-# If design spec exists, USE it — don't redesign from scratch
+# If design spec exists, USE it -- don't redesign from scratch
 if [ -f "$RUN_DIR/architecture.md" ]; then
-  echo "Architecture doc found — read it and design UI to match"
+  echo "Architecture doc found -- read it and design UI to match"
   cat "$RUN_DIR/architecture.md"
 fi
 
 # If requirements exist, design to cover ALL requirements
 if [ -f "$RUN_DIR/requirements.md" ]; then
-  echo "Requirements found — every requirement needs a UI representation"
+  echo "Requirements found -- every requirement needs a UI representation"
   cat "$RUN_DIR/requirements.md"
 fi
 ```
 
 If a design spec or plan already exists from brainstorming/planning phase:
-- **Use it as the foundation** — don't start from scratch
+- **Use it as the foundation** -- don't start from scratch
 - Add visual detail to the existing spec (component structure, states, responsive behavior)
 - If Gemini is available, ask it to refine and expand the existing spec
 
@@ -115,13 +115,13 @@ RUN_DIR=$(ls -td .claude/orchestrator/runs/*/ 2>/dev/null | head -1)
 ```
 
 Structure:
-- **User Goals** — what users are trying to accomplish
-- **User Flow** — step-by-step interaction sequence
-- **Component Spec** — each UI component with props, states, interactions
-- **Responsive Behavior** — how layout adapts across breakpoints (320px, 768px, 1024px, 1440px)
-- **Accessibility** — ARIA labels, keyboard navigation, screen reader support, focus management
-- **Edge Cases** — empty states, error states, loading states, permission-denied states
-- **AI Tools Used** — which AI tools were used and what they contributed (for traceability)
+- **User Goals** -- what users are trying to accomplish
+- **User Flow** -- step-by-step interaction sequence
+- **Component Spec** -- each UI component with props, states, interactions
+- **Responsive Behavior** -- how layout adapts across breakpoints (320px, 768px, 1024px, 1440px)
+- **Accessibility** -- ARIA labels, keyboard navigation, screen reader support, focus management
+- **Edge Cases** -- empty states, error states, loading states, permission-denied states
+- **AI Tools Used** -- which AI tools were used and what they contributed (for traceability)
 
 ## Rules
 - Follow existing UI patterns and component library
@@ -129,4 +129,4 @@ Structure:
 - Every image/icon must have alt text or aria-label
 - Color must not be the only way to convey information
 - If Gemini suggestions conflict with project conventions, project conventions win
-- If a design spec already exists, build on it — don't redesign from scratch
+- If a design spec already exists, build on it -- don't redesign from scratch

@@ -41,8 +41,8 @@ memory_instructions="Watch for these patterns during our conversation:\\n- If I 
 session_context="<IMPORTANT>\\nYou have devtools installed.\\n\\n${using_devtools_escaped}\\n\\n<auto-memory>\\n${memory_instructions}\\n</auto-memory>${update_notice}\\n</IMPORTANT>"
 
 # Output context injection as JSON
-# Claude Code sets CLAUDE_PLUGIN_ROOT — emit only hookSpecificOutput
-# Other platforms (Cursor, etc.) — emit only additional_context
+# Claude Code sets CLAUDE_PLUGIN_ROOT -- emit only hookSpecificOutput
+# Other platforms (Cursor, etc.) -- emit only additional_context
 if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
   cat <<EOF
 {

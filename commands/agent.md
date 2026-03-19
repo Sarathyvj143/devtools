@@ -12,6 +12,12 @@ $ARGUMENTS
 
 Dispatch one or more agents directly without full orchestration.
 
+### Platform Notes
+
+- These instructions assume a bash-like shell for grep/ls examples.
+- On Windows PowerShell, use `Get-ChildItem`, `Select-String`, and `Get-Content`.
+- If you do not have bash on Windows, avoid bash-only snippets and use the PowerShell equivalents below.
+
 ### Parse Arguments
 
 - `--list`: show available agents and exit
@@ -27,9 +33,9 @@ Dispatch one or more agents directly without full orchestration.
 4. Display:
    ```
    Project agents (.claude/agents/):
-     react-frontend-developer  — React frontend specialist
-     node-backend-developer    — Node.js backend specialist
-     fullstack-tester          — Cross-service test writer
+     react-frontend-developer  -- React frontend specialist
+     node-backend-developer    -- Node.js backend specialist
+     fullstack-tester          -- Cross-service test writer
 
    Base agents (available with --generic):
      requirements, researcher, architect, ux-designer, developer,
@@ -52,6 +58,8 @@ Dispatch one or more agents directly without full orchestration.
 3. Verify parallel safety:
    - Read-only agents (researcher, reviewer, security, architect, requirements, ux-designer, cost-optimizer): always safe in parallel
    - Write agents (developer, tester, devops, docs-writer): safe only if scoped to different directories
+   - If project agents exist, read `.claude/team-config.json` to map each agent to its `service` and `service_path`
+   - If scope cannot be inferred, ask the user to confirm which directories each write agent will touch
    - If unsafe: run sequentially instead, tell user why
 4. Dispatch all agents in parallel using multiple Agent tool calls in a single message
 5. Collect and present results

@@ -24,7 +24,7 @@ Read `.claude/team-config.json` for the full commands block if this section is e
 
 ## Platform Detection
 
-- Claude Code on Windows uses Git Bash — Unix commands work
+- Claude Code on Windows uses Git Bash -- Unix commands work
 - Key difference: Python uses `waitress` on Windows instead of `gunicorn`
 - Key difference: Go outputs `.exe` on Windows
 - Check `.claude/team-config.json` for platform-specific commands (`start_prod_linux`, `start_prod_windows`)
@@ -66,7 +66,7 @@ For each service in startup order:
   1. cd into working_dir
   2. Detect platform (check for venv/Scripts vs venv/bin)
   3. Run start_prod_linux or start_prod_windows from team-config.json
-  4. Wait for health check (timeout: 60 seconds — prod may be slower to start)
+  4. Wait for health check (timeout: 60 seconds -- prod may be slower to start)
   5. Report status
 ```
 
@@ -74,8 +74,8 @@ For each service in startup order:
 ```
 Run sustained health checks for 2 minutes:
   Every 10 seconds, hit each service's health endpoint
-  If any check fails → report which service and when
-  If all pass → report "Production mode stable"
+  If any check fails -> report which service and when
+  If all pass -> report "Production mode stable"
 ```
 
 ## Output Format
@@ -88,14 +88,14 @@ Structure:
 ## Build Results
 | Service | Build Command | Duration | Output Size | Status |
 |---------|--------------|----------|-------------|--------|
-| backend | pip install + gunicorn | 12s | — | OK |
+| backend | pip install + gunicorn | 12s | -- | OK |
 | frontend | pnpm run build | 8s | 2.1MB | OK |
 
 ## Validation Checklist
 - [x] Production env vars set
 - [x] No debug settings
 - [x] No hardcoded secrets
-- [ ] Source maps disabled — WARNING: source maps found in dist/
+- [ ] Source maps disabled -- WARNING: source maps found in dist/
 
 ## Production Services
 | Service | URL | Port | Status |
@@ -110,16 +110,16 @@ All services stable. No failures detected.
 ## Standalone Usage
 
 When used via `/agent prod-runner`:
-- `build` — build all services
-- `build <service>` — build one service
-- `validate` — run validation checklist only
-- `start` — build + validate + start in production mode
-- `check` — health check running production services
+- `build` -- build all services
+- `build <service>` -- build one service
+- `validate` -- run validation checklist only
+- `start` -- build + validate + start in production mode
+- `check` -- health check running production services
 
 ## Rules
-- Always read `.claude/team-config.json` for commands — don't guess
+- Always read `.claude/team-config.json` for commands -- don't guess
 - Always cd into working directory before running commands
 - Always build before starting production mode
 - Never start production with development env vars
 - Report exact commands executed
-- Flag any build that takes >5 minutes
+- Flag builds that take significantly longer than expected (compare against previous build times if available, or use framework defaults: frontend builds ~2-3 min, backend builds ~1-2 min for typical projects)
