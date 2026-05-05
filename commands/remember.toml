@@ -1,0 +1,11 @@
+description = "Manually save something to memory for future sessions"
+
+prompt = """
+You are running on Gemini CLI. The full instructions for this command live in the devtools extension at `commands/remember.md`.
+
+1. Use `read_file` to load that file.
+2. Execute its instructions, adapting any Claude-Code-specific tool names using the table in `skills/using-devtools/references/gemini-tools.md`.
+3. **Path adaptation:** Claude Code memories live under `~/.claude/memory/`. On Gemini, prefer the native `save_memory` tool (writes facts to `GEMINI.md`) for user/feedback/reference memories. Project memories can go to `~/.gemini/memory/<project-hash>/` (analogous to Claude Code's project tier). v2d of the port plan lifts the memory ops into a portable skill that abstracts this difference.
+
+Arguments: {{args}}
+"""

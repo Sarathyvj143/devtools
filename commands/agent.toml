@@ -1,0 +1,11 @@
+description = "Use an agent standalone or dispatch multiple agents in parallel"
+
+prompt = """
+You are running on Gemini CLI. The full instructions for this command live in the devtools extension at `commands/agent.md`.
+
+1. Use `read_file` to load that file.
+2. Execute its instructions, adapting any Claude-Code-specific tool names using the table in `skills/using-devtools/references/gemini-tools.md`.
+3. **Heads up — limited support on Gemini in v1.** This command dispatches subagents using Claude Code's `Agent` tool (no direct Gemini equivalent in v1). The `--list` mode works on Gemini (it's just a directory listing of `agents/` files). Single-agent and multi-agent dispatch modes need v2b's agent port. Until then, on Gemini, treat agents as documentation: read the agent's `.md` file inline and execute its instructions yourself rather than dispatching as a subagent.
+
+Arguments: {{args}}
+"""

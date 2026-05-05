@@ -1,0 +1,11 @@
+description = "Import portable memories from plugin repo into local Claude memory"
+
+prompt = """
+You are running on Gemini CLI. The full instructions for this command live in the devtools extension at `commands/memory-import.md`.
+
+1. Use `read_file` to load that file.
+2. Execute its instructions, adapting any Claude-Code-specific tool names using the table in `skills/using-devtools/references/gemini-tools.md`.
+3. **Path adaptation:** the destination paths in the MD reference `~/.claude/memory/` and `~/.claude/projects/<hash>/memory/`. On Gemini, route user/feedback/reference memories to `~/.gemini/memory/` (or use the native `save_memory` tool to persist into `GEMINI.md`). Route project memories to `~/.gemini/memory/<project-hash>/` if available. The source (`<plugin-repo>/memories/`) is platform-agnostic.
+
+Arguments: {{args}}
+"""

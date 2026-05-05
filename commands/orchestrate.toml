@@ -1,0 +1,11 @@
+description = "Run a phased multi-agent workflow on a task"
+
+prompt = """
+You are running on Gemini CLI. The full instructions for this command live in the devtools extension at `commands/orchestrate.md`.
+
+1. Use `read_file` to load that file.
+2. Execute its instructions, adapting any Claude-Code-specific tool names using the table in `skills/using-devtools/references/gemini-tools.md`. The Claude Code `Skill` tool maps to `activate_skill` on Gemini.
+3. **Heads up — partial support on Gemini in v1.** This command dispatches subagents (`.claude/agents/`, the `Agent` tool, `Skill` invocation of `devtools:orchestrator`) which are Claude-Code-only in v1. Where Gemini lacks the dispatch primitive, run the orchestrator skill inline and explain that subagent fan-out is unavailable. Full multi-agent dispatch is deferred to v2b.
+
+Arguments: {{args}}
+"""

@@ -51,6 +51,8 @@ For tool name differences between Claude Code and Codex, see:
 
 ## Updating
 
+There is **no `/plugin update` mechanism on Codex** — the marketplace flow is Claude-Code-only. To pull the latest plugin contents:
+
 ```bash
 cd ~/.codex/devtools && git pull
 ```
@@ -59,3 +61,5 @@ On Windows (cmd):
 ```cmd
 cd %USERPROFILE%\.codex\devtools && git pull
 ```
+
+Skills auto-load on next session via the existing symlink. There is no agents-regen step on Codex in v1 (no agents are installed).

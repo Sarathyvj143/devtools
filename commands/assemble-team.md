@@ -470,6 +470,14 @@ Example result:
 
 ### Step 7: Generate Agents with Concrete Commands
 
+#### Platform note (v2b)
+
+For Gemini CLI installs, read base templates from `<plugin-path>/agents/_bases-gemini/<name>.md` instead. Those files are generated from `agents/_bases/` by `scripts/build-gemini-agents.py` — same content, but with frontmatter shaped for Gemini's subagent loader (`allowed-tools` renamed to `tools`, tool names mapped via `skills/using-devtools/references/gemini-tools.md`). On Claude Code and Codex, continue using `agents/_bases/`. If the user passes `--platform=gemini` (or running on Gemini host), select `_bases-gemini/`. Auto-detect by checking `$env:GEMINI_CLI` or the absence of `~/.claude/`.
+
+Note: a full Gemini `/assemble-team` flow also needs a Gemini-side equivalent of `.claude/team-config.json` (e.g. `.gemini/team-config.json`) and a way to run the generated subagents. Both are open follow-ups beyond v2b's foundation work.
+
+#### Standard generation
+
 For each selected agent:
 1. Read base template from `<plugin-path>/agents/_bases/<name>.md`
 2. Read profile context for the agent's assigned service

@@ -1,0 +1,12 @@
+description = "Check whether the devtools plugin has been updated since this project's agents were generated"
+
+prompt = """
+You are running on Gemini CLI. The full instructions for this command live in the devtools extension at `commands/check-updates.md`.
+
+1. Use `read_file` to load that file.
+2. Execute its instructions, adapting any Claude-Code-specific tool names using the table in `skills/using-devtools/references/gemini-tools.md`.
+3. **Path adaptation for Gemini:** the MD references `~/.claude/plugins/installed_plugins.json`. On Gemini, that file does not exist. Instead, the plugin lives at `~/.gemini/extensions/devtools/` (per `GEMINI-INSTALL.md` Option A) or wherever the user symlinked it under Option B. Use `~/.gemini/extensions/devtools/` as the default plugin path. Use `run_shell_command` to run `git rev-parse --short HEAD` inside that directory.
+4. **No `.claude/team-config.json` on Gemini in v1.** This means the comparison-against-recorded-commit step has no data to compare against until v2b ships an agent flow on Gemini. For now, on Gemini, just report the current plugin commit and tell the user: *"On Gemini in v1, there is no per-project agent generation — so there is nothing to compare against. This command primarily reports the current plugin commit. Re-run after v2b ships."*
+
+Arguments: {{args}}
+"""

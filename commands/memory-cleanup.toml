@@ -1,0 +1,11 @@
+description = "Review and prune stale memories"
+
+prompt = """
+You are running on Gemini CLI. The full instructions for this command live in the devtools extension at `commands/memory-cleanup.md`.
+
+1. Use `read_file` to load that file.
+2. Execute its instructions, adapting any Claude-Code-specific tool names using the table in `skills/using-devtools/references/gemini-tools.md`.
+3. **Path adaptation:** the scan targets in the MD reference `~/.claude/memory/`, `~/.claude/projects/<hash>/memory/`, and the portable `<plugin-repo>/memories/`. On Gemini, also scan `~/.gemini/memory/` and Gemini's project-tier path. The portable target is platform-agnostic.
+
+Arguments: {{args}}
+"""

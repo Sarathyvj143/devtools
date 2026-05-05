@@ -1,0 +1,11 @@
+description = "Export local memories to plugin repo for cross-machine sync"
+
+prompt = """
+You are running on Gemini CLI. The full instructions for this command live in the devtools extension at `commands/memory-export.md`.
+
+1. Use `read_file` to load that file.
+2. Execute its instructions, adapting any Claude-Code-specific tool names using the table in `skills/using-devtools/references/gemini-tools.md`.
+3. **Path adaptation:** the source paths in the MD reference `~/.claude/memory/` and `~/.claude/projects/<hash>/memory/` (Claude Code's tiers). On Gemini, also scan `~/.gemini/memory/` (Gemini's user tier) and any project-tier equivalent. The destination (`<plugin-repo>/memories/`) is platform-agnostic — same target on both platforms.
+
+Arguments: {{args}}
+"""

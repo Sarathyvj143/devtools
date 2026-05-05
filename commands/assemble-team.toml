@@ -1,0 +1,11 @@
+description = "Detect project type, generate project-specific agents, or audit existing team"
+
+prompt = """
+You are running on Gemini CLI. The full instructions for this command live in the devtools extension at `commands/assemble-team.md`.
+
+1. Use `read_file` to load that file.
+2. Execute its instructions, adapting any Claude-Code-specific tool names using the table in `skills/using-devtools/references/gemini-tools.md`.
+3. **Heads up — partial support on Gemini in v1.** This command was authored for Claude Code and depends on Claude-Code-specific paths (`~/.claude/plugins/installed_plugins.json`, `.claude/agents/`, `.claude/team-config.json`) and the `Agent` tool, which has no direct Gemini equivalent. Where it does, explain the gap to the user instead of silently failing. A first-class Gemini agent flow is deferred to v2b of the port plan.
+
+Arguments: {{args}}
+"""
